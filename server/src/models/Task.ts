@@ -20,6 +20,7 @@ export interface PipelineTask {
   createdAt: number;
   completedAt?: number;
   error?: string;
+  notifiedAt?: number; // Timestamp of last stuck-agent notification (avoids spam)
 }
 
 export interface MetaAgentConfig {
@@ -29,4 +30,7 @@ export interface MetaAgentConfig {
   defaultDirectory: string;
   defaultProvider: AgentProvider;
   pollIntervalMs: number;
+  adminEmail?: string;
+  whatsappPhone?: string;
+  stuckTimeoutMs?: number; // How long an agent can be in waiting_input before notification (default 5 min)
 }

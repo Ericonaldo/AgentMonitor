@@ -18,7 +18,6 @@ The agent manager should be able to understand what each agent is doing and crea
 Keep working until confirmed all features works, passed with test. for premium ability, need to finish a small project managed by the agent manager
 
 Use this tool to further develop future functions
-
 After every new function developed, update the related doc.
 
 Now try to support codex, all requirements are same to claude code. use your bash and chrome mcp to verify all functions.
@@ -34,7 +33,7 @@ Keep working until all functions confirmed working.
    - `npm test`  
 
 **自动commit and合并到 main**：
-after each feature done and tested pass, should commit then merge to main
+after each feature done and tested pass, should **commit then merge to main** before each commit, update related doc for new features if have.
    - `git fetch origin main`
    - `git rebase origin/main`，如果失败，按照下面的“冲突处理”来 resolve rebase conflict
    - 如果成功，则：

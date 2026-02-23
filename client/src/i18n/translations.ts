@@ -165,6 +165,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'pipeline.defaultProvider': 'Default Provider',
     'pipeline.pollInterval': 'Poll Interval (ms)',
     'pipeline.defaultClaudeMd': 'Default CLAUDE.md for managed agents',
+    'pipeline.adminEmail': 'Admin Email (notifications)',
+    'pipeline.adminEmailPlaceholder': 'admin@example.com',
+    'pipeline.whatsappPhone': 'WhatsApp Phone (notifications)',
+    'pipeline.whatsappPhonePlaceholder': '+1234567890',
+    'pipeline.stuckTimeout': 'Stuck Agent Timeout (minutes)',
     'pipeline.saveConfig': 'Save Configuration',
   },
 
@@ -332,6 +337,11 @@ export const translations: Record<Language, Record<string, string>> = {
     'pipeline.defaultProvider': '默认提供者',
     'pipeline.pollInterval': '轮询间隔（毫秒）',
     'pipeline.defaultClaudeMd': '托管代理的默认 CLAUDE.md',
+    'pipeline.adminEmail': '管理员邮箱（通知）',
+    'pipeline.adminEmailPlaceholder': 'admin@example.com',
+    'pipeline.whatsappPhone': 'WhatsApp 手机号（通知）',
+    'pipeline.whatsappPhonePlaceholder': '+1234567890',
+    'pipeline.stuckTimeout': '卡住代理超时（分钟）',
     'pipeline.saveConfig': '保存配置',
   },
 };

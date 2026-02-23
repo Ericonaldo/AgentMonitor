@@ -84,6 +84,9 @@ export interface MetaAgentConfig {
   defaultDirectory: string;
   defaultProvider: AgentProvider;
   pollIntervalMs: number;
+  adminEmail?: string;
+  whatsappPhone?: string;
+  stuckTimeoutMs?: number;
 }
 
 export const api = {

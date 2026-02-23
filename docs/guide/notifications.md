@@ -96,9 +96,27 @@ TWILIO_WHATSAPP_FROM=+14155238886
 
 When creating an agent, enter your phone number (with country code, e.g. `+1234567890`) in the **WhatsApp Phone** field. The agent will send a WhatsApp message whenever it needs human interaction.
 
+## Agent Manager (Pipeline) Notifications
+
+The Agent Manager supports its own notification settings, separate from individual agent notifications. Configure these in **Agent Manager > Configure**:
+
+| Field | Description |
+|---|---|
+| **Admin Email** | Email address to receive pipeline notifications |
+| **WhatsApp Phone** | Phone number for WhatsApp pipeline notifications |
+| **Stuck Agent Timeout** | Minutes before a `waiting_input` agent triggers a stuck notification (default: 5) |
+
+The Agent Manager sends notifications for:
+
+- **Stuck agents** — When an agent has been in `waiting_input` state longer than the timeout, the manager sends a notification. Duplicate notifications are suppressed until the timeout elapses again.
+- **Failed tasks** — When a task transitions to `failed`, the manager notifies the admin immediately.
+- **Pipeline complete** — When all tasks finish (completed or failed), the manager sends a summary and auto-stops. Agent worktrees are automatically cleaned up.
+
+These notifications use the same SMTP and Twilio infrastructure as individual agent notifications (see above for environment variable setup).
+
 ## Using Both Channels
 
-You can configure both email and WhatsApp for the same agent. When the agent needs attention, notifications will be sent through all configured channels simultaneously.
+You can configure both email and WhatsApp for the same agent or for the Agent Manager. When attention is needed, notifications will be sent through all configured channels simultaneously.
 
 ## Troubleshooting
 

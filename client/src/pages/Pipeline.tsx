@@ -28,6 +28,9 @@ export function Pipeline() {
   const [cfgDir, setCfgDir] = useState('');
   const [cfgProvider, setCfgProvider] = useState<AgentProvider>('claude');
   const [cfgPollInterval, setCfgPollInterval] = useState(5000);
+  const [cfgAdminEmail, setCfgAdminEmail] = useState('');
+  const [cfgWhatsappPhone, setCfgWhatsappPhone] = useState('');
+  const [cfgStuckTimeout, setCfgStuckTimeout] = useState(300000);
 
   const fetchData = useCallback(async () => {
     try {
@@ -115,6 +118,9 @@ export function Pipeline() {
       defaultDirectory: cfgDir,
       defaultProvider: cfgProvider,
       pollIntervalMs: cfgPollInterval,
+      adminEmail: cfgAdminEmail.trim() || undefined,
+      whatsappPhone: cfgWhatsappPhone.trim() || undefined,
+      stuckTimeoutMs: cfgStuckTimeout,
     });
     setShowConfig(false);
     fetchData();
@@ -126,6 +132,9 @@ export function Pipeline() {
       setCfgDir(metaConfig.defaultDirectory);
       setCfgProvider(metaConfig.defaultProvider);
       setCfgPollInterval(metaConfig.pollIntervalMs);
+      setCfgAdminEmail(metaConfig.adminEmail || '');
+      setCfgWhatsappPhone(metaConfig.whatsappPhone || '');
+      setCfgStuckTimeout(metaConfig.stuckTimeoutMs || 300000);
     }
     setShowConfig(true);
   };
@@ -391,6 +400,34 @@ export function Pipeline() {
                   step={1000}
                 />
               </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>{t('pipeline.adminEmail')}</label>
+                <input
+                  value={cfgAdminEmail}
+                  onChange={(e) => setCfgAdminEmail(e.target.value)}
+                  placeholder={t('pipeline.adminEmailPlaceholder')}
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>{t('pipeline.whatsappPhone')}</label>
+                <input
+                  value={cfgWhatsappPhone}
+                  onChange={(e) => setCfgWhatsappPhone(e.target.value)}
+                  placeholder={t('pipeline.whatsappPhonePlaceholder')}
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label>{t('pipeline.stuckTimeout')}</label>
+              <input
+                type="number"
+                value={cfgStuckTimeout / 60000}
+                onChange={(e) => setCfgStuckTimeout((parseInt(e.target.value) || 5) * 60000)}
+                min={1}
+                step={1}
+              />
             </div>
             <div className="form-group">
               <label>{t('pipeline.defaultClaudeMd')}</label>

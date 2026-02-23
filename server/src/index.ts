@@ -8,6 +8,8 @@ import { config } from './config.js';
 import { AgentStore } from './store/AgentStore.js';
 import { AgentManager } from './services/AgentManager.js';
 import { MetaAgentManager } from './services/MetaAgentManager.js';
+import { EmailNotifier } from './services/EmailNotifier.js';
+import { WhatsAppNotifier } from './services/WhatsAppNotifier.js';
 import { agentRoutes } from './routes/agents.js';
 import { templateRoutes } from './routes/templates.js';
 import { sessionRoutes } from './routes/sessions.js';
@@ -28,8 +30,10 @@ export function createApp() {
   app.use(express.json());
 
   const store = new AgentStore();
-  const manager = new AgentManager(store);
-  const metaAgent = new MetaAgentManager(store, manager);
+  const emailNotifier = new EmailNotifier();
+  const whatsappNotifier = new WhatsAppNotifier();
+  const manager = new AgentManager(store, undefined, emailNotifier, whatsappNotifier);
+  const metaAgent = new MetaAgentManager(store, manager, emailNotifier, whatsappNotifier);
 
   // REST routes
   app.use('/api/agents', agentRoutes(manager));
