@@ -42,7 +42,7 @@ export default defineConfig({
       },
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/anthropics/agent-monitor' },
+      { icon: 'github', link: 'https://github.com/Ericonaldo/AgentMonitor' },
     ],
   },
 });

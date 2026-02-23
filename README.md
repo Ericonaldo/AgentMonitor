@@ -4,189 +4,174 @@
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tests](https://img.shields.io/badge/Tests-40%20passing-22c55e?style=for-the-badge)](server/__tests__)
-[![i18n](https://img.shields.io/badge/i18n-EN%20%7C%20%E4%B8%AD%E6%96%87-6366f1?style=for-the-badge)](#internationalization)
 
-A web-based monitoring and management system for AI coding agents. Supports **Claude Code** and **OpenAI Codex** CLI agents.
+**Agent Monitor** is an enterprise-ready web platform for orchestrating, monitoring, and managing AI coding agents at scale. Deploy Claude Code and OpenAI Codex agents from a unified dashboard — with real-time observability, automated task pipelines, and instant notifications via **Email** and **WhatsApp**.
+
+---
+
+## Key Features
+
+### Multi-Agent Orchestration
+- **Unified dashboard** — Create, monitor, and manage Claude Code and Codex agents from a single interface
+- **Task pipelines** — Define sequential and parallel task workflows; the built-in Meta Agent Manager automates execution end-to-end
+- **Git worktree isolation** — Every agent operates in its own branch, preventing conflicts when multiple agents work in the same repository
+
+### Real-Time Monitoring & Interaction
+- **Live streaming** — Watch agent output in real-time over WebSocket
+- **Web terminal** — Full chat interface with 25+ slash commands matching CLI behavior
+- **Cost & token tracking** — Per-agent cost (Claude) and token usage (Codex) displayed in real time
+- **Double-Esc interrupt** — Press Escape twice to send SIGINT to any running agent
+
+### Notifications — Email & WhatsApp
+Stay informed wherever you are. Agent Monitor sends instant notifications when agents need human attention.
+
+| Channel | Provider | Setup |
+|---------|----------|-------|
+| **Email** | Any SMTP server (Gmail, Outlook, Mailgun, etc.) | Configure `SMTP_*` environment variables |
+| **WhatsApp** | Twilio API | Configure `TWILIO_*` environment variables |
+
+Notifications are triggered when:
+- An agent enters `waiting_input` state and needs human intervention
+- A pipeline task fails
+- A stuck agent exceeds the configurable timeout threshold
+- The entire pipeline completes
+
+Both channels can be enabled simultaneously — configure an admin email and/or WhatsApp phone number per agent or globally for the Agent Manager.
+
+> See the [Notifications Guide](docs/guide/notifications.md) for detailed setup instructions.
+
+### Template & Instruction Management
+- **CLAUDE.md templates** — Create reusable instruction sets and load them when spawning agents
+- **Live editing** — Modify an agent's CLAUDE.md at any time without restarting
+- **Session resume** — Pick up previous Claude Code sessions where they left off
+
+### Internationalization
+- Full **English** and **Chinese** localization
+- One-click language toggle persisted across sessions
+
+---
 
 ## Screenshots
 
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
+| Dashboard | Task Pipeline |
+|-----------|---------------|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Pipeline](docs/screenshots/pipeline.png) |
 
-### Task Pipeline
-![Pipeline](docs/screenshots/pipeline.png)
+| Create Agent | Templates |
+|--------------|-----------|
+| ![Create Agent](docs/screenshots/create-agent.png) | ![Templates](docs/screenshots/templates.png) |
 
-### Create Agent
-![Create Agent](docs/screenshots/create-agent.png)
+| Chinese Language |
+|------------------|
+| ![Dashboard (Chinese)](docs/screenshots/dashboard-zh.png) |
 
-### Templates
-![Templates](docs/screenshots/templates.png)
-
-### Chinese Language Support
-![Dashboard (Chinese)](docs/screenshots/dashboard-zh.png)
-
-## Features
-
-- **Multi-provider support**: Create and manage both Claude Code and Codex agents from a single dashboard
-- **Real-time streaming**: Watch agent output in real-time via WebSocket
-- **Dashboard**: Card-based overview of all agents with status, last message, and cost/token tracking
-- **Web terminal interface**: Send messages, view conversation history, use slash commands matching CLI behavior
-- **Task Pipeline**: Sequential and parallel task orchestration with a meta agent manager
-- **Git worktree isolation**: Each agent runs in its own git worktree branch to avoid conflicts
-- **CLAUDE.md management**: Create templates, load them into agents, edit per-agent CLAUDE.md live
-- **Directory browser**: Browse server directories to select working directories
-- **Session resume**: Resume previous Claude Code sessions
-- **Email notifications**: Get notified when an agent needs human interaction
-- **Double-Esc interrupt**: Press Escape twice to send SIGINT to the agent
-- **Slash commands**: `/help`, `/clear`, `/status`, `/cost`, `/stop`, `/compact`, `/model`, `/export`
-- **Internationalization**: Full Chinese/English support with one-click language toggle
-
-## Architecture
-
-```
-AgentMonitor/
-  package.json              # Monorepo root
-  server/                   # Node.js + Express + Socket.IO + TypeScript
-    src/
-      index.ts              # HTTP server entry point (port 3456)
-      config.ts             # Environment configuration
-      models/               # TypeScript interfaces
-      store/AgentStore.ts   # JSON file persistence
-      services/
-        AgentProcess.ts     # Wraps claude/codex CLI process
-        AgentManager.ts     # Agent lifecycle management
-        MetaAgentManager.ts # Pipeline task orchestration
-        WorktreeManager.ts  # Git worktree operations
-        SessionReader.ts    # Read ~/.claude/projects/ sessions
-        EmailNotifier.ts    # nodemailer integration
-        DirectoryBrowser.ts # Server directory listing
-      routes/               # REST API endpoints
-      socket/handlers.ts    # WebSocket event handlers
-    __tests__/              # 40 backend tests
-  client/                   # React + Vite + TypeScript
-    src/
-      i18n/                 # Internationalization (EN/ZH)
-        translations.ts     # Translation dictionaries
-        LanguageContext.tsx  # React context + useTranslation hook
-      pages/
-        Dashboard.tsx       # Agent card grid
-        CreateAgent.tsx     # Creation wizard
-        AgentChat.tsx       # Chat interface
-        Templates.tsx       # Template management
-        Pipeline.tsx        # Task pipeline UI
-      api/
-        client.ts           # REST API client
-        socket.ts           # Socket.IO client
-```
-
-## Prerequisites
-
-- **Node.js** >= 18
-- **Claude Code CLI** (`claude`) - for Claude agents
-- **Codex CLI** (`codex`) - for Codex agents
-- **Git** - for worktree isolation
+---
 
 ## Quick Start
 
+### Prerequisites
+
+- **Node.js** >= 18
+- **Claude Code CLI** (`claude`) — for Claude agents
+- **Codex CLI** (`codex`) — for Codex agents
+- **Git** — for worktree isolation
+
+### Installation
+
 ```bash
-# Install dependencies
+git clone <repo-url> && cd AgentMonitor
 npm install
 cd server && npm install && cd ..
 cd client && npm install && cd ..
+```
 
-# Build the frontend
+### Production
+
+```bash
 cd client && npx vite build && cd ..
-
-# Start the server (serves both API and frontend)
 cd server && npx tsx src/index.ts
 ```
 
-Open http://localhost:3456 in your browser.
+Open **http://localhost:3456** in your browser.
 
-### Development Mode
+### Development
 
 ```bash
-npm run dev    # Starts both server (tsx watch) and client (vite dev) concurrently
+npm run dev    # Starts server (tsx watch) + client (vite dev) concurrently
 ```
 
 - Client dev server: http://localhost:5173 (proxies API to :3456)
 - API server: http://localhost:3456
 
-## Usage Guide
+---
+
+## Configuration
+
+All configuration is via environment variables. Copy `.env.example` to `.env` and set the values you need.
+
+### Server
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3456` | Server port |
+| `CLAUDE_BIN` | `claude` | Path to Claude CLI binary |
+| `CODEX_BIN` | `codex` | Path to Codex CLI binary |
+
+### Email Notifications (SMTP)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SMTP_HOST` | — | SMTP server hostname (e.g., `smtp.gmail.com`) |
+| `SMTP_PORT` | `587` | SMTP port (`587` for STARTTLS, `465` for TLS) |
+| `SMTP_SECURE` | `false` | Set `true` for port 465 |
+| `SMTP_USER` | — | SMTP username |
+| `SMTP_PASS` | — | SMTP password or app-specific password |
+| `SMTP_FROM` | `agent-monitor@localhost` | Sender address |
+
+### WhatsApp Notifications (Twilio)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TWILIO_ACCOUNT_SID` | — | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | — | Twilio Auth Token |
+| `TWILIO_WHATSAPP_FROM` | — | WhatsApp-enabled Twilio phone number (e.g., `+14155238886`) |
+
+> If SMTP or Twilio credentials are not set, the respective notification channel is disabled gracefully — events are logged to the server console.
+
+---
+
+## Usage
 
 ### Creating an Agent
 
-1. Click **"+ New Agent"** on the Dashboard or navigate to **New Agent**
-2. **Select Provider**: Choose between **Claude Code** or **Codex**
-3. **Name**: Give the agent a descriptive name
-4. **Working Directory**: Type a path or click **Browse** to navigate the server filesystem
-5. **Prompt**: Describe what the agent should do
-6. **Model** (optional): Specify a model (e.g., `claude-sonnet-4-5-20250514` or `o3`)
-7. **Flags**:
-   - Claude: `--dangerously-skip-permissions`
-   - Codex: `--dangerously-bypass-approvals-and-sandbox`, `--full-auto`
-8. **Resume Session** (Claude only): Pick a previous session to continue
-9. **CLAUDE.md**: Write custom instructions or load from a template
-10. **Admin Email**: Optional email for notifications when the agent needs input
-11. Click **Create Agent**
+1. Click **"+ New Agent"** on the Dashboard
+2. Select **Provider** — Claude Code or Codex
+3. Set **Name**, **Working Directory**, and **Prompt**
+4. Configure **Flags** (e.g., `--dangerously-skip-permissions`)
+5. Optionally load a **CLAUDE.md template**
+6. Enter an **Admin Email** and/or **WhatsApp Phone** for notifications
+7. Click **Create Agent**
 
 ### Dashboard
 
-The dashboard shows all agents as cards:
-
-- **Status badge**: running (green), stopped (gray), error (red), waiting_input (yellow)
-- **Provider badge**: CLAUDE (orange) or CODEX (green)
-- **Last message**: Preview of the most recent agent output
-- **Actions**: Stop individual agents, Delete agents, or Stop All
-
-Click a card to enter the agent's chat view.
+Agents appear as status cards showing provider, status, latest output, and cost. Click any card to open the full chat interface.
 
 ### Agent Chat
 
-The chat view provides a full conversation interface:
+Send messages, view conversation history, interrupt with Double-Esc, and use slash commands:
 
-- **Message history**: See all agent messages (assistant, tool, system)
-- **Send messages**: Type in the input box and press Enter
-- **Double-Esc**: Press Escape twice quickly to interrupt the agent (sends SIGINT)
-- **Slash commands**: Type `/` to see available commands
-  - `/help` - Show available commands
-  - `/clear` - Clear chat display
-  - `/status` - Refresh agent status
-  - `/cost` - Show current cost
-  - `/stop` - Stop the agent
-  - `/compact` - Compact conversation
-  - `/model` - Show/change model
-  - `/export` - Export conversation
-- **Edit CLAUDE.md**: Click the button to modify the agent's instructions live
-- **Cost/Token tracking**: See cost (Claude) or token usage (Codex) in the header
+`/help` `/clear` `/status` `/cost` `/stop` `/compact` `/model` `/export`
 
 ### Task Pipeline
 
-The pipeline page enables task orchestration:
-
-- **Sequential tasks**: Tasks run one after another (different step orders)
-- **Parallel tasks**: Tasks with the same step order run simultaneously
-- **Meta Agent Manager**: Automated agent that picks up tasks from the queue
-- **Configure**: Set default working directory, provider, and CLAUDE.md for managed agents
+Orchestrate multi-step workflows with sequential and parallel task definitions. The Meta Agent Manager automatically provisions agents, monitors progress, sends notifications on failures, and cleans up on completion.
 
 ### Templates
 
-Navigate to **Templates** to manage CLAUDE.md templates:
+Create, edit, and reuse CLAUDE.md instruction templates across agents.
 
-- **Create**: Write reusable instruction sets
-- **Edit**: Modify existing templates
-- **Delete**: Remove templates
-- **Load into agents**: When creating an agent, select a template from the dropdown
-
-### Internationalization
-
-Agent Monitor supports **English** and **Chinese** with a language toggle in the navigation bar.
-
-- Click **"中文"** to switch to Chinese
-- Click **"EN"** to switch back to English
-- Language preference is saved in localStorage and persists across sessions
+---
 
 ## API Reference
 
@@ -198,54 +183,35 @@ Agent Monitor supports **English** and **Chinese** with a language toggle in the
 | GET | `/api/agents/:id` | Get agent details |
 | POST | `/api/agents` | Create agent |
 | POST | `/api/agents/:id/stop` | Stop agent |
-| POST | `/api/agents/:id/message` | Send message to agent |
+| POST | `/api/agents/:id/message` | Send message |
 | POST | `/api/agents/:id/interrupt` | Interrupt agent (SIGINT) |
-| PUT | `/api/agents/:id/claude-md` | Update agent's CLAUDE.md |
+| PUT | `/api/agents/:id/claude-md` | Update CLAUDE.md |
 | DELETE | `/api/agents/:id` | Delete agent |
 | POST | `/api/agents/actions/stop-all` | Stop all agents |
-
-#### Create Agent Request Body
-
-```json
-{
-  "name": "my-agent",
-  "provider": "claude",
-  "directory": "/path/to/project",
-  "prompt": "Fix the login bug",
-  "claudeMd": "# Instructions\nWrite tests.",
-  "adminEmail": "admin@example.com",
-  "flags": {
-    "dangerouslySkipPermissions": true,
-    "model": "claude-sonnet-4-5-20250514",
-    "resume": "session-id",
-    "fullAuto": false
-  }
-}
-```
-
-### Templates
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/templates` | List all templates |
-| GET | `/api/templates/:id` | Get template |
-| POST | `/api/templates` | Create template |
-| PUT | `/api/templates/:id` | Update template |
-| DELETE | `/api/templates/:id` | Delete template |
 
 ### Pipeline Tasks
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/tasks` | List all pipeline tasks |
-| POST | `/api/tasks` | Create a pipeline task |
-| DELETE | `/api/tasks/:id` | Delete a task |
+| GET | `/api/tasks` | List pipeline tasks |
+| POST | `/api/tasks` | Create task |
+| DELETE | `/api/tasks/:id` | Delete task |
 | POST | `/api/tasks/:id/reset` | Reset task status |
 | POST | `/api/tasks/clear-completed` | Clear completed/failed tasks |
 | GET | `/api/meta/config` | Get meta agent config |
 | PUT | `/api/meta/config` | Update meta agent config |
 | POST | `/api/meta/start` | Start meta agent manager |
 | POST | `/api/meta/stop` | Stop meta agent manager |
+
+### Templates
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/templates` | List templates |
+| GET | `/api/templates/:id` | Get template |
+| POST | `/api/templates` | Create template |
+| PUT | `/api/templates/:id` | Update template |
+| DELETE | `/api/templates/:id` | Delete template |
 
 ### Other
 
@@ -259,55 +225,63 @@ Agent Monitor supports **English** and **Chinese** with a language toggle in the
 
 | Event | Direction | Description |
 |-------|-----------|-------------|
-| `agent:join` | Client -> Server | Subscribe to agent messages |
-| `agent:leave` | Client -> Server | Unsubscribe |
-| `agent:send` | Client -> Server | Send message `{agentId, text}` |
-| `agent:interrupt` | Client -> Server | Send interrupt |
-| `agent:message` | Server -> Client | Agent output `{agentId, message}` |
-| `agent:status` | Server -> Client | Status change `{agentId, status}` |
-| `task:update` | Server -> Client | Pipeline task updated |
-| `pipeline:complete` | Server -> Client | All pipeline tasks complete |
-| `meta:status` | Server -> Client | Meta agent status change |
+| `agent:join` | Client → Server | Subscribe to agent messages |
+| `agent:leave` | Client → Server | Unsubscribe |
+| `agent:send` | Client → Server | Send message |
+| `agent:interrupt` | Client → Server | Send interrupt |
+| `agent:message` | Server → Client | Agent output |
+| `agent:status` | Server → Client | Status change |
+| `task:update` | Server → Client | Pipeline task updated |
+| `pipeline:complete` | Server → Client | Pipeline complete |
+| `meta:status` | Server → Client | Meta agent status |
 
-## Provider Details
+---
 
-### Claude Code
+## Provider Support
 
-- Binary: `claude` (or set `CLAUDE_BIN` env var)
-- Runs: `claude -p <prompt> --output-format stream-json`
-- Supports: `--dangerously-skip-permissions`, `--resume`, `--model`
-- Stream format: NDJSON with `type`/`subtype` fields
-- Tracks: cost in USD
+| | Claude Code | Codex |
+|---|---|---|
+| **Binary** | `claude` | `codex` |
+| **Flags** | `--dangerously-skip-permissions`, `--resume`, `--model` | `--dangerously-bypass-approvals-and-sandbox`, `--full-auto`, `--model` |
+| **Tracking** | Cost (USD) | Token usage |
 
-### Codex
-
-- Binary: `codex` (or set `CODEX_BIN` env var)
-- Runs: `codex exec --json <prompt>`
-- Supports: `--dangerously-bypass-approvals-and-sandbox`, `--full-auto`, `--model`, `--cd`, `--skip-git-repo-check`
-- Stream format: NDJSON events (`thread.started`, `turn.started`, `item.completed`, `turn.completed`)
-- Tracks: token usage (input/output)
-
-## Configuration
-
-Environment variables:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3456` | Server port |
-| `CLAUDE_BIN` | `claude` | Path to Claude CLI |
-| `CODEX_BIN` | `codex` | Path to Codex CLI |
-| `SMTP_HOST` | | SMTP server host |
-| `SMTP_PORT` | `587` | SMTP server port |
-| `SMTP_SECURE` | `false` | Use TLS |
-| `SMTP_USER` | | SMTP username |
-| `SMTP_PASS` | | SMTP password |
-| `SMTP_FROM` | `agent-monitor@localhost` | From address |
+---
 
 ## Testing
 
 ```bash
-npm test          # Run all tests (40 tests)
+npm test    # 40 tests
 ```
+
+---
+
+## Architecture
+
+```
+AgentMonitor/
+  server/                   # Node.js + Express + Socket.IO
+    src/
+      services/
+        AgentProcess.ts     # CLI process wrapper
+        AgentManager.ts     # Agent lifecycle
+        MetaAgentManager.ts # Pipeline orchestration
+        WorktreeManager.ts  # Git worktree ops
+        EmailNotifier.ts    # SMTP email notifications
+        WhatsAppNotifier.ts # Twilio WhatsApp notifications
+        SessionReader.ts    # Session history
+        DirectoryBrowser.ts # Directory listing
+      store/AgentStore.ts   # JSON persistence
+      routes/               # REST endpoints
+      socket/handlers.ts    # WebSocket handlers
+    __tests__/              # Test suite
+  client/                   # React + Vite
+    src/
+      pages/                # Dashboard, Chat, Pipeline, Templates
+      i18n/                 # EN / ZH localization
+      api/                  # REST + Socket.IO clients
+```
+
+---
 
 ## License
 

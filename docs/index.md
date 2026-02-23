@@ -2,8 +2,8 @@
 layout: home
 hero:
   name: Agent Monitor
-  text: Manage AI Coding Agents
-  tagline: Web-based monitor for Claude Code and Codex agents with real-time chat, pipeline orchestration, and i18n support.
+  text: AI Agent Orchestration Platform
+  tagline: Deploy, monitor, and manage Claude Code and Codex agents at scale — with real-time observability, task pipelines, and instant Email & WhatsApp notifications.
   actions:
     - theme: brand
       text: Get Started
@@ -13,11 +13,15 @@ hero:
       link: /api/
 features:
   - title: Multi-Agent Dashboard
-    details: Monitor all running agents with real-time status updates, cost tracking, and token usage.
-  - title: Interactive Chat
-    details: Web-based terminal with 25 slash commands matching Claude Code CLI behavior.
-  - title: Task Pipeline
-    details: Orchestrate sequential and parallel tasks with the Meta Agent Manager.
+    details: Create, monitor, and manage Claude Code and Codex agents from a unified real-time dashboard with cost and token tracking.
+  - title: Email & WhatsApp Notifications
+    details: Get instant alerts via Email (SMTP) or WhatsApp (Twilio) when agents need human attention, tasks fail, or pipelines complete.
+  - title: Task Pipeline Orchestration
+    details: Define sequential and parallel workflows. The Meta Agent Manager automates agent provisioning, monitoring, and cleanup.
+  - title: Interactive Web Terminal
+    details: Full chat interface with 25+ slash commands, Double-Esc interrupt, live CLAUDE.md editing, and session resume.
+  - title: Git Worktree Isolation
+    details: Every agent runs in its own branch — multiple agents can work in the same repository without conflicts.
   - title: i18n Support
-    details: Full Chinese and English localization with one-click language switching.
+    details: Full English and Chinese localization with one-click language switching persisted across sessions.
 ---
