@@ -267,6 +267,16 @@ export class AgentManager extends EventEmitter {
     }
   }
 
+  renameAgent(agentId: string, newName: string): void {
+    const agent = this.store.getAgent(agentId);
+    if (agent) {
+      agent.name = newName;
+      agent.lastActivity = Date.now();
+      this.store.saveAgent(agent);
+      this.emit('agent:status', agentId, agent.status);
+    }
+  }
+
   sendMessage(agentId: string, text: string): void {
     const proc = this.processes.get(agentId);
     if (proc) {

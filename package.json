@@ -10,9 +10,13 @@
     "build:server": "cd server && npm run build",
     "build:client": "cd client && npm run build",
     "test": "cd server && npm test",
-    "test:client": "cd client && npm test"
+    "test:client": "cd client && npm test",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "vitepress": "^1.6.4"
   }
 }

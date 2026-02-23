@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type AgentProvider, type Template, type SessionInfo, type DirListing } from '../api/client';
+import { useTranslation } from '../i18n';
 
 export function CreateAgent() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [provider, setProvider] = useState<AgentProvider>('claude');
   const [name, setName] = useState('');
   const [directory, setDirectory] = useState('');
@@ -46,13 +48,13 @@ export function CreateAgent() {
   };
 
   const handleTemplateSelect = (templateId: string) => {
-    const t = templates.find((t) => t.id === templateId);
-    if (t) setClaudeMd(t.content);
+    const tmpl = templates.find((t) => t.id === templateId);
+    if (tmpl) setClaudeMd(tmpl.content);
   };
 
   const handleCreate = async () => {
     if (!name || !directory || !prompt) {
-      setError('Name, directory, and prompt are required');
+      setError(t('create.requiredFields'));
       return;
     }
     setCreating(true);
@@ -82,7 +84,7 @@ export function CreateAgent() {
   return (
     <div style={{ maxWidth: 700 }}>
       <div className="page-header">
-        <h1 className="page-title">Create Agent</h1>
+        <h1 className="page-title">{t('create.title')}</h1>
       </div>
 
       {error && (
@@ -92,40 +94,40 @@ export function CreateAgent() {
       )}
 
       <div className="form-group">
-        <label>Provider</label>
+        <label>{t('common.provider')}</label>
         <div className="provider-selector">
           <button
             className={`provider-btn ${provider === 'claude' ? 'active' : ''}`}
             onClick={() => setProvider('claude')}
             type="button"
           >
-            Claude Code
+            {t('common.claudeCode')}
           </button>
           <button
             className={`provider-btn ${provider === 'codex' ? 'active' : ''}`}
             onClick={() => setProvider('codex')}
             type="button"
           >
-            Codex
+            {t('common.codex')}
           </button>
         </div>
       </div>
 
       <div className="form-group">
-        <label>Name</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-agent" />
+        <label>{t('create.name')}</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('create.namePlaceholder')} />
       </div>
 
       <div className="form-group">
-        <label>Working Directory</label>
+        <label>{t('create.workingDir')}</label>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
             value={directory}
             onChange={(e) => setDirectory(e.target.value)}
-            placeholder="/path/to/project"
+            placeholder={t('create.workingDirPlaceholder')}
           />
           <button className="btn btn-outline" onClick={() => browseTo(directory || undefined)}>
-            Browse
+            {t('common.browse')}
           </button>
         </div>
       </div>
@@ -146,29 +148,29 @@ export function CreateAgent() {
                   {entry.name}/
                 </span>
                 <button className="btn btn-sm" onClick={() => selectDir(entry.path)}>
-                  Select
+                  {t('common.select')}
                 </button>
               </div>
             ))}
           <div style={{ padding: '6px 12px' }}>
             <button className="btn btn-sm" onClick={() => selectDir(dirListing.path)}>
-              Select current: {dirListing.path}
+              {t('create.selectCurrent')} {dirListing.path}
             </button>
           </div>
         </div>
       )}
 
       <div className="form-group">
-        <label>Prompt</label>
+        <label>{t('create.prompt')}</label>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="What should the agent do?"
+          placeholder={t('create.promptPlaceholder')}
         />
       </div>
 
       <div className="form-group">
-        <label>Model (optional)</label>
+        <label>{t('create.model')}</label>
         <input
           value={model}
           onChange={(e) => setModel(e.target.value)}
@@ -177,7 +179,7 @@ export function CreateAgent() {
       </div>
 
       <div className="form-group">
-        <label>Flags</label>
+        <label>{t('create.flags')}</label>
         <div className="checkbox-group">
           <label className="checkbox-label">
             <input
@@ -204,9 +206,9 @@ export function CreateAgent() {
 
       {provider === 'claude' && (
         <div className="form-group">
-          <label>Resume Previous Session</label>
+          <label>{t('create.resumeSession')}</label>
           <select value={resumeSession} onChange={(e) => setResumeSession(e.target.value)}>
-            <option value="">New session</option>
+            <option value="">{t('create.newSession')}</option>
             {sessions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.projectPath} - {new Date(s.lastModified).toLocaleString()}
@@ -218,16 +220,16 @@ export function CreateAgent() {
 
       <div className="form-group">
         <label>
-          CLAUDE.md{' '}
+          {t('create.claudeMd')}{' '}
           {templates.length > 0 && (
             <select
               style={{ marginLeft: 8, padding: '2px 4px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 4, color: 'var(--text)', fontSize: 12 }}
               onChange={(e) => handleTemplateSelect(e.target.value)}
               defaultValue=""
             >
-              <option value="" disabled>Load template...</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+              <option value="" disabled>{t('create.loadTemplate')}</option>
+              {templates.map((tmpl) => (
+                <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
               ))}
             </select>
           )}
@@ -235,23 +237,23 @@ export function CreateAgent() {
         <textarea
           value={claudeMd}
           onChange={(e) => setClaudeMd(e.target.value)}
-          placeholder="Optional CLAUDE.md content for the agent"
+          placeholder={t('create.claudeMdPlaceholder')}
           style={{ minHeight: 160 }}
         />
       </div>
 
       <div className="form-group">
-        <label>Admin Email (for notifications)</label>
+        <label>{t('create.adminEmail')}</label>
         <input
           value={adminEmail}
           onChange={(e) => setAdminEmail(e.target.value)}
-          placeholder="admin@example.com"
+          placeholder={t('create.adminEmailPlaceholder')}
           type="email"
         />
       </div>
 
       <button className="btn" onClick={handleCreate} disabled={creating}>
-        {creating ? 'Creating...' : 'Create Agent'}
+        {creating ? t('create.creating') : t('create.createAgent')}
       </button>
     </div>
   );

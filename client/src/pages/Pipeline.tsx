@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type PipelineTask, type MetaAgentConfig, type AgentProvider } from '../api/client';
 import { getSocket } from '../api/socket';
+import { useTranslation } from '../i18n';
 
 export function Pipeline() {
   const [tasks, setTasks] = useState<PipelineTask[]>([]);
@@ -10,6 +11,7 @@ export function Pipeline() {
   const [showConfig, setShowConfig] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // New task form
   const [newName, setNewName] = useState('');
@@ -148,12 +150,12 @@ export function Pipeline() {
 
   const sortedOrders = [...orderGroups.keys()].sort((a, b) => a - b);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>{t('common.loading')}</div>;
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Task Pipeline</h1>
+        <h1 className="page-title">{t('pipeline.title')}</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <span
             style={{
@@ -165,26 +167,26 @@ export function Pipeline() {
               fontWeight: 600,
             }}
           >
-            Manager: {metaConfig?.running ? 'Running' : 'Stopped'}
+            {t('pipeline.manager')} {metaConfig?.running ? t('pipeline.running') : t('pipeline.stopped')}
           </span>
           {metaConfig?.running ? (
             <button className="btn btn-danger btn-sm" onClick={handleStopMeta}>
-              Stop Manager
+              {t('pipeline.stopManager')}
             </button>
           ) : (
             <button className="btn btn-sm" onClick={handleStartMeta}>
-              Start Manager
+              {t('pipeline.startManager')}
             </button>
           )}
           <button className="btn btn-sm btn-outline" onClick={openConfig}>
-            Configure
+            {t('pipeline.configure')}
           </button>
           <button className="btn btn-sm" onClick={() => setShowAddTask(true)}>
-            + Add Task
+            {t('pipeline.addTask')}
           </button>
-          {tasks.some(t => t.status === 'completed' || t.status === 'failed') && (
+          {tasks.some(tsk => tsk.status === 'completed' || tsk.status === 'failed') && (
             <button className="btn btn-sm btn-outline" onClick={handleClearCompleted}>
-              Clear Done
+              {t('pipeline.clearDone')}
             </button>
           )}
         </div>
@@ -192,7 +194,7 @@ export function Pipeline() {
 
       {tasks.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>
-          No tasks in pipeline. Add tasks and start the manager to begin.
+          {t('pipeline.empty')}
         </div>
       ) : (
         <div className="pipeline-timeline">
@@ -211,7 +213,7 @@ export function Pipeline() {
                 )}
                 <div className="pipeline-group">
                   <div className="pipeline-group-label">
-                    Step {order} {isParallel && <span style={{ color: 'var(--primary)' }}>(parallel)</span>}
+                    {t('pipeline.step')} {order} {isParallel && <span style={{ color: 'var(--primary)' }}>{t('pipeline.parallel')}</span>}
                   </div>
                   <div className={`pipeline-tasks ${isParallel ? 'parallel' : ''}`}>
                     {group.map((task) => (
@@ -236,7 +238,7 @@ export function Pipeline() {
                         </div>
                         {task.directory && (
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                            Dir: {task.directory}
+                            {t('pipeline.dir')} {task.directory}
                           </div>
                         )}
                         {task.provider && (
@@ -246,18 +248,18 @@ export function Pipeline() {
                         )}
                         {task.error && (
                           <div style={{ fontSize: 11, color: 'var(--red)', marginTop: 4 }}>
-                            Error: {task.error}
+                            {t('pipeline.error')} {task.error}
                           </div>
                         )}
                         <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                           {task.status === 'pending' && (
                             <button className="btn btn-sm btn-danger" onClick={() => handleDeleteTask(task.id)}>
-                              Delete
+                              {t('common.delete')}
                             </button>
                           )}
                           {(task.status === 'failed' || task.status === 'completed') && (
                             <button className="btn btn-sm btn-outline" onClick={() => handleResetTask(task.id)}>
-                              Reset
+                              {t('common.reset')}
                             </button>
                           )}
                           {task.agentId && (
@@ -265,7 +267,7 @@ export function Pipeline() {
                               className="btn btn-sm btn-outline"
                               onClick={() => navigate(`/agent/${task.agentId}`)}
                             >
-                              View Agent
+                              {t('pipeline.viewAgent')}
                             </button>
                           )}
                         </div>
@@ -284,57 +286,57 @@ export function Pipeline() {
         <div className="modal-overlay" onClick={() => setShowAddTask(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <span className="modal-title">Add Pipeline Task</span>
+              <span className="modal-title">{t('pipeline.addTaskTitle')}</span>
               <button className="btn btn-sm btn-outline" onClick={() => setShowAddTask(false)}>
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
             <div className="form-group">
-              <label>Task Name</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g., Create login page" />
+              <label>{t('pipeline.taskName')}</label>
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('pipeline.taskNamePlaceholder')} />
             </div>
             <div className="form-group">
-              <label>Prompt</label>
+              <label>{t('create.prompt')}</label>
               <textarea
                 value={newPrompt}
                 onChange={(e) => setNewPrompt(e.target.value)}
-                placeholder="What should the agent do?"
+                placeholder={t('pipeline.promptPlaceholder')}
                 style={{ minHeight: 80 }}
               />
             </div>
             <div className="form-group">
-              <label>Working Directory (optional, uses default if empty)</label>
-              <input value={newDir} onChange={(e) => setNewDir(e.target.value)} placeholder="/path/to/project" />
+              <label>{t('pipeline.workingDirOptional')}</label>
+              <input value={newDir} onChange={(e) => setNewDir(e.target.value)} placeholder={t('pipeline.workingDirPlaceholder')} />
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Provider</label>
+                <label>{t('common.provider')}</label>
                 <select value={newProvider} onChange={(e) => setNewProvider(e.target.value as AgentProvider)}>
-                  <option value="claude">Claude Code</option>
-                  <option value="codex">Codex</option>
+                  <option value="claude">{t('common.claudeCode')}</option>
+                  <option value="codex">{t('common.codex')}</option>
                 </select>
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Model (optional)</label>
+                <label>{t('pipeline.modelOptional')}</label>
                 <input value={newModel} onChange={(e) => setNewModel(e.target.value)} placeholder="e.g., claude-sonnet-4-5-20250514" />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Step Order</label>
+                <label>{t('pipeline.stepOrder')}</label>
                 <input
                   type="number"
                   value={newOrder}
                   onChange={(e) => setNewOrder(e.target.value ? parseInt(e.target.value) : '')}
-                  placeholder="Auto (next)"
+                  placeholder={t('pipeline.stepOrderPlaceholder')}
                   min={0}
                 />
               </div>
             </div>
             <div className="form-group">
-              <label>CLAUDE.md (optional, uses manager default if empty)</label>
+              <label>{t('pipeline.claudeMdOptional')}</label>
               <textarea
                 value={newClaudeMd}
                 onChange={(e) => setNewClaudeMd(e.target.value)}
-                placeholder="Custom instructions for this task..."
+                placeholder={t('pipeline.claudeMdPlaceholder')}
                 style={{ minHeight: 60 }}
               />
             </div>
@@ -345,12 +347,12 @@ export function Pipeline() {
                   checked={newSkipPerms}
                   onChange={(e) => setNewSkipPerms(e.target.checked)}
                 />
-                Skip permissions
+                {t('pipeline.skipPermissions')}
               </label>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button className="btn" onClick={handleAddTask} disabled={!newName.trim() || !newPrompt.trim()}>
-                Add Task
+                {t('pipeline.addTaskBtn')}
               </button>
             </div>
           </div>
@@ -362,25 +364,25 @@ export function Pipeline() {
         <div className="modal-overlay" onClick={() => setShowConfig(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <span className="modal-title">Manager Configuration</span>
+              <span className="modal-title">{t('pipeline.configTitle')}</span>
               <button className="btn btn-sm btn-outline" onClick={() => setShowConfig(false)}>
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
             <div className="form-group">
-              <label>Default Working Directory</label>
-              <input value={cfgDir} onChange={(e) => setCfgDir(e.target.value)} placeholder="/path/to/default/project" />
+              <label>{t('pipeline.defaultDir')}</label>
+              <input value={cfgDir} onChange={(e) => setCfgDir(e.target.value)} placeholder={t('pipeline.defaultDirPlaceholder')} />
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Default Provider</label>
+                <label>{t('pipeline.defaultProvider')}</label>
                 <select value={cfgProvider} onChange={(e) => setCfgProvider(e.target.value as AgentProvider)}>
-                  <option value="claude">Claude Code</option>
-                  <option value="codex">Codex</option>
+                  <option value="claude">{t('common.claudeCode')}</option>
+                  <option value="codex">{t('common.codex')}</option>
                 </select>
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Poll Interval (ms)</label>
+                <label>{t('pipeline.pollInterval')}</label>
                 <input
                   type="number"
                   value={cfgPollInterval}
@@ -391,7 +393,7 @@ export function Pipeline() {
               </div>
             </div>
             <div className="form-group">
-              <label>Default CLAUDE.md for managed agents</label>
+              <label>{t('pipeline.defaultClaudeMd')}</label>
               <textarea
                 value={cfgClaudeMd}
                 onChange={(e) => setCfgClaudeMd(e.target.value)}
@@ -400,7 +402,7 @@ export function Pipeline() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button className="btn" onClick={handleSaveConfig}>
-                Save Configuration
+                {t('pipeline.saveConfig')}
               </button>
             </div>
           </div>

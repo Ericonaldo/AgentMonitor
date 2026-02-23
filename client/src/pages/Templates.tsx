@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api, type Template } from '../api/client';
+import { useTranslation } from '../i18n';
 
 export function Templates() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -7,6 +8,7 @@ export function Templates() {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
+  const { t } = useTranslation();
 
   const fetchTemplates = async () => {
     try {
@@ -44,10 +46,10 @@ export function Templates() {
     fetchTemplates();
   };
 
-  const startEdit = (t: Template) => {
-    setEditing(t);
-    setName(t.name);
-    setContent(t.content);
+  const startEdit = (tmpl: Template) => {
+    setEditing(tmpl);
+    setName(tmpl.name);
+    setContent(tmpl.content);
     setCreating(false);
   };
 
@@ -63,10 +65,10 @@ export function Templates() {
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">CLAUDE.md Templates</h1>
+        <h1 className="page-title">{t('templates.title')}</h1>
         {!isFormOpen && (
           <button className="btn" onClick={startCreate}>
-            + New Template
+            {t('templates.newTemplate')}
           </button>
         )}
       </div>
@@ -74,21 +76,21 @@ export function Templates() {
       {isFormOpen && (
         <div style={{ marginBottom: 24 }}>
           <div className="form-group">
-            <label>Template Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="My template" />
+            <label>{t('templates.templateName')}</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('templates.templateNamePlaceholder')} />
           </div>
           <div className="form-group">
-            <label>Content</label>
+            <label>{t('templates.content')}</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="CLAUDE.md content..."
+              placeholder={t('templates.contentPlaceholder')}
               style={{ minHeight: 200 }}
             />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn" onClick={editing ? handleUpdate : handleCreate}>
-              {editing ? 'Update' : 'Create'}
+              {editing ? t('common.update') : t('common.create')}
             </button>
             <button
               className="btn btn-outline"
@@ -97,7 +99,7 @@ export function Templates() {
                 setCreating(false);
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -106,24 +108,24 @@ export function Templates() {
       <div className="template-list">
         {templates.length === 0 && !isFormOpen ? (
           <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>
-            No templates yet. Create one to get started.
+            {t('templates.empty')}
           </div>
         ) : (
-          templates.map((t) => (
-            <div key={t.id} className="template-item">
+          templates.map((tmpl) => (
+            <div key={tmpl.id} className="template-item">
               <div>
-                <div className="template-item-name">{t.name}</div>
+                <div className="template-item-name">{tmpl.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                  {t.content.slice(0, 80)}
-                  {t.content.length > 80 ? '...' : ''}
+                  {tmpl.content.slice(0, 80)}
+                  {tmpl.content.length > 80 ? '...' : ''}
                 </div>
               </div>
               <div className="template-actions">
-                <button className="btn btn-sm btn-outline" onClick={() => startEdit(t)}>
-                  Edit
+                <button className="btn btn-sm btn-outline" onClick={() => startEdit(tmpl)}>
+                  {t('common.edit')}
                 </button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(t.id)}>
-                  Delete
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(tmpl.id)}>
+                  {t('common.delete')}
                 </button>
               </div>
             </div>

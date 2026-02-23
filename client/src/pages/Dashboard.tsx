@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Agent } from '../api/client';
 import { getSocket } from '../api/socket';
+import { useTranslation } from '../i18n';
 
 export function Dashboard() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const fetchAgents = async () => {
     try {
@@ -59,25 +61,25 @@ export function Dashboard() {
   };
 
   const getLastMessage = (agent: Agent) => {
-    if (agent.messages.length === 0) return 'No messages yet';
+    if (agent.messages.length === 0) return t('dashboard.noMessages');
     const last = agent.messages[agent.messages.length - 1];
     const text = last.content;
     return text.length > 100 ? text.slice(0, 100) + '...' : text;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>{t('common.loading')}</div>;
 
   return (
     <div>
       <div className="page-header">
-        <h1 className="page-title">Dashboard</h1>
+        <h1 className="page-title">{t('dashboard.title')}</h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn" onClick={() => navigate('/create')}>
-            + New Agent
+            {t('dashboard.newAgent')}
           </button>
           {agents.length > 0 && (
             <button className="btn btn-danger" onClick={handleStopAll}>
-              Stop All
+              {t('dashboard.stopAll')}
             </button>
           )}
         </div>
@@ -85,7 +87,7 @@ export function Dashboard() {
 
       {agents.length === 0 ? (
         <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)' }}>
-          No agents running. Create one to get started.
+          {t('dashboard.empty')}
         </div>
       ) : (
         <div className="card-grid">
@@ -118,14 +120,14 @@ export function Dashboard() {
                     className="btn btn-sm btn-outline"
                     onClick={(e) => handleStop(e, agent.id)}
                   >
-                    Stop
+                    {t('common.stop')}
                   </button>
                 )}
                 <button
                   className="btn btn-sm btn-danger"
                   onClick={(e) => handleDelete(e, agent.id)}
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
                 {agent.costUsd !== undefined && (
                   <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>

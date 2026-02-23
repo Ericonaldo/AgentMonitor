@@ -111,6 +111,11 @@ export const api = {
     }),
   interruptAgent: (id: string) =>
     request('/agents/' + id + '/interrupt', { method: 'POST' }),
+  renameAgent: (id: string, name: string) =>
+    request('/agents/' + id + '/rename', {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    }),
   updateClaudeMd: (id: string, content: string) =>
     request('/agents/' + id + '/claude-md', {
       method: 'PUT',

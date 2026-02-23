@@ -43,6 +43,13 @@ export function createApp() {
     res.json({ ok: true });
   });
 
+  // Serve built docs (VitePress)
+  const docsDist = path.resolve(__dirname, '..', '..', 'docs', '.vitepress', 'dist');
+  app.use('/docs', express.static(docsDist));
+  app.get('/docs/*', (_req, res) => {
+    res.sendFile(path.join(docsDist, 'index.html'));
+  });
+
   // Serve built client
   const clientDist = path.resolve(__dirname, '..', '..', 'client', 'dist');
   app.use(express.static(clientDist));

@@ -1,4 +1,4 @@
-:root {
+:root, [data-theme="dark"] {
   --bg: #0f1117;
   --bg-card: #1a1d27;
   --bg-input: #252832;
@@ -11,6 +11,20 @@
   --yellow: #eab308;
   --red: #ef4444;
   --radius: 8px;
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-input: #f0f0f3;
+  --border: #d1d5db;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --primary: #4f46e5;
+  --primary-hover: #6366f1;
+  --green: #16a34a;
+  --yellow: #ca8a04;
+  --red: #dc2626;
 }
 
 * {
@@ -50,6 +64,48 @@ body {
 .nav-links {
   display: flex;
   gap: 16px;
+  flex: 1;
+}
+
+/* Help button */
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.help-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Language toggle */
+.lang-toggle {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.lang-toggle:hover {
+  border-color: var(--primary);
+  background: var(--border);
 }
 
 .nav-links a {
