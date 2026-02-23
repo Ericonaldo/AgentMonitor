@@ -15,6 +15,7 @@ export interface AgentConfig {
   claudeMd?: string;
   adminEmail?: string;
   whatsappPhone?: string;
+  slackWebhookUrl?: string;
   flags: {
     dangerouslySkipPermissions?: boolean;
     resume?: string;

@@ -10,6 +10,7 @@ import { AgentManager } from './services/AgentManager.js';
 import { MetaAgentManager } from './services/MetaAgentManager.js';
 import { EmailNotifier } from './services/EmailNotifier.js';
 import { WhatsAppNotifier } from './services/WhatsAppNotifier.js';
+import { SlackNotifier } from './services/SlackNotifier.js';
 import { agentRoutes, settingsRoutes } from './routes/agents.js';
 import { templateRoutes } from './routes/templates.js';
 import { sessionRoutes } from './routes/sessions.js';
@@ -32,8 +33,9 @@ export function createApp() {
   const store = new AgentStore();
   const emailNotifier = new EmailNotifier();
   const whatsappNotifier = new WhatsAppNotifier();
-  const manager = new AgentManager(store, undefined, emailNotifier, whatsappNotifier);
-  const metaAgent = new MetaAgentManager(store, manager, emailNotifier, whatsappNotifier);
+  const slackNotifier = new SlackNotifier();
+  const manager = new AgentManager(store, undefined, emailNotifier, whatsappNotifier, slackNotifier);
+  const metaAgent = new MetaAgentManager(store, manager, emailNotifier, whatsappNotifier, slackNotifier);
 
   // REST routes
   app.use('/api/agents', agentRoutes(manager));

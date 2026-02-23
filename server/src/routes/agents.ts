@@ -45,7 +45,7 @@ export function agentRoutes(manager: AgentManager): Router {
   // Create agent
   router.post('/', async (req, res) => {
     try {
-      const { name, directory, prompt, claudeMd, adminEmail, whatsappPhone, flags, provider } = req.body;
+      const { name, directory, prompt, claudeMd, adminEmail, whatsappPhone, slackWebhookUrl, flags, provider } = req.body;
 
       if (!name || !directory || !prompt) {
         res.status(400).json({ error: 'name, directory, and prompt are required' });
@@ -59,6 +59,7 @@ export function agentRoutes(manager: AgentManager): Router {
         claudeMd,
         adminEmail,
         whatsappPhone,
+        slackWebhookUrl,
         flags: flags || {},
       });
 

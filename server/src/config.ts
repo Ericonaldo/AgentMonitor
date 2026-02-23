@@ -21,4 +21,7 @@ export const config = {
     authToken: process.env.TWILIO_AUTH_TOKEN || '',
     fromNumber: process.env.TWILIO_WHATSAPP_FROM || '',
   },
+  slack: {
+    webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
+  },
 };

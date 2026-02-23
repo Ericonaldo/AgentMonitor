@@ -30,6 +30,7 @@ export function Pipeline() {
   const [cfgPollInterval, setCfgPollInterval] = useState(5000);
   const [cfgAdminEmail, setCfgAdminEmail] = useState('');
   const [cfgWhatsappPhone, setCfgWhatsappPhone] = useState('');
+  const [cfgSlackWebhook, setCfgSlackWebhook] = useState('');
   const [cfgStuckTimeout, setCfgStuckTimeout] = useState(300000);
 
   const fetchData = useCallback(async () => {
@@ -120,6 +121,7 @@ export function Pipeline() {
       pollIntervalMs: cfgPollInterval,
       adminEmail: cfgAdminEmail.trim() || undefined,
       whatsappPhone: cfgWhatsappPhone.trim() || undefined,
+      slackWebhookUrl: cfgSlackWebhook.trim() || undefined,
       stuckTimeoutMs: cfgStuckTimeout,
     });
     setShowConfig(false);
@@ -134,6 +136,7 @@ export function Pipeline() {
       setCfgPollInterval(metaConfig.pollIntervalMs);
       setCfgAdminEmail(metaConfig.adminEmail || '');
       setCfgWhatsappPhone(metaConfig.whatsappPhone || '');
+      setCfgSlackWebhook(metaConfig.slackWebhookUrl || '');
       setCfgStuckTimeout(metaConfig.stuckTimeoutMs || 300000);
     }
     setShowConfig(true);
@@ -418,6 +421,14 @@ export function Pipeline() {
                   placeholder={t('pipeline.whatsappPhonePlaceholder')}
                 />
               </div>
+            </div>
+            <div className="form-group">
+              <label>{t('pipeline.slackWebhook')}</label>
+              <input
+                value={cfgSlackWebhook}
+                onChange={(e) => setCfgSlackWebhook(e.target.value)}
+                placeholder={t('pipeline.slackWebhookPlaceholder')}
+              />
             </div>
             <div className="form-group">
               <label>{t('pipeline.stuckTimeout')}</label>

@@ -6,6 +6,7 @@ import { AgentProcess, type StreamMessage } from './AgentProcess.js';
 import { WorktreeManager } from './WorktreeManager.js';
 import { EmailNotifier } from './EmailNotifier.js';
 import { WhatsAppNotifier } from './WhatsAppNotifier.js';
+import { SlackNotifier } from './SlackNotifier.js';
 
 export class AgentManager extends EventEmitter {
   private processes: Map<string, AgentProcess> = new Map();
@@ -13,13 +14,15 @@ export class AgentManager extends EventEmitter {
   private worktreeManager: WorktreeManager;
   private emailNotifier: EmailNotifier;
   private whatsappNotifier: WhatsAppNotifier;
+  private slackNotifier: SlackNotifier;
 
-  constructor(store: AgentStore, worktreeManager?: WorktreeManager, emailNotifier?: EmailNotifier, whatsappNotifier?: WhatsAppNotifier) {
+  constructor(store: AgentStore, worktreeManager?: WorktreeManager, emailNotifier?: EmailNotifier, whatsappNotifier?: WhatsAppNotifier, slackNotifier?: SlackNotifier) {
     super();
     this.store = store;
     this.worktreeManager = worktreeManager || new WorktreeManager();
     this.emailNotifier = emailNotifier || new EmailNotifier();
     this.whatsappNotifier = whatsappNotifier || new WhatsAppNotifier();
+    this.slackNotifier = slackNotifier || new SlackNotifier();
   }
 
   async createAgent(name: string, agentConfig: AgentConfig): Promise<Agent> {
@@ -200,7 +203,7 @@ export class AgentManager extends EventEmitter {
   }
 
   private handleCodexMessage(agent: Agent, msg: StreamMessage): void {
-    // Codex JSONL events: thread.started, turn.started, item.completed, turn.completed
+    // Codex JSONL events: thread.started, turn.started, item.started, item.completed, turn.completed
     if (msg.type === 'item.completed' && msg.item) {
       if (msg.item.type === 'agent_message') {
         agent.messages.push({
@@ -211,11 +214,15 @@ export class AgentManager extends EventEmitter {
         });
         agent.lastActivity = Date.now();
         this.store.saveAgent(agent);
-      } else if (msg.item.type === 'tool_call' || msg.item.type === 'function_call') {
+      } else if (msg.item.type === 'command_execution' || msg.item.type === 'tool_call' || msg.item.type === 'function_call') {
+        const item = msg.item as { type?: string; command?: string; aggregated_output?: string; exit_code?: number; text?: string };
+        const content = item.command
+          ? `Command: ${item.command}${item.aggregated_output ? `\nOutput: ${item.aggregated_output}` : ''}${item.exit_code !== undefined ? ` (exit: ${item.exit_code})` : ''}`
+          : `Tool: ${item.text || JSON.stringify(msg.item)}`;
         agent.messages.push({
           id: uuid(),
           role: 'tool',
-          content: `Tool: ${msg.item.text || JSON.stringify(msg.item)}`,
+          content,
           timestamp: Date.now(),
         });
         agent.lastActivity = Date.now();
@@ -264,6 +271,13 @@ export class AgentManager extends EventEmitter {
         agent.config.whatsappPhone,
         agent.name,
         notificationMessage,
+      );
+    }
+    if (agent.config.slackWebhookUrl) {
+      this.slackNotifier.notifyHumanNeeded(
+        agent.name,
+        notificationMessage,
+        agent.config.slackWebhookUrl,
       );
     }
   }

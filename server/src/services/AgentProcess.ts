@@ -22,6 +22,10 @@ export interface StreamMessage {
     id?: string;
     type?: string;
     text?: string;
+    command?: string;
+    aggregated_output?: string;
+    exit_code?: number;
+    status?: string;
   };
   // codex: turn.completed usage
   usage?: {

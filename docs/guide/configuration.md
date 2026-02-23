@@ -39,6 +39,14 @@ See the [Notifications](./notifications.md) guide for detailed setup instruction
 
 See the [Notifications](./notifications.md) guide for detailed setup instructions.
 
+### Slack Notifications (Webhook)
+
+| Variable | Default | Description |
+|---|---|---|
+| `SLACK_WEBHOOK_URL` | _(none)_ | Slack Incoming Webhook URL |
+
+See the [Notifications](./notifications.md) guide for detailed setup instructions.
+
 ## Agent Flags
 
 When creating an agent, you can configure these flags:
@@ -65,4 +73,4 @@ Each agent runs in an isolated git worktree to prevent conflicts when multiple a
 
 ## Notifications
 
-Set an admin email or WhatsApp phone number when creating an agent to receive notifications when the agent needs human interaction. See the [Notifications](./notifications.md) guide for full setup details.
+Set an admin email, WhatsApp phone number, or Slack webhook URL when creating an agent to receive notifications when the agent needs human interaction. See the [Notifications](./notifications.md) guide for full setup details.

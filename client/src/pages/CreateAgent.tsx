@@ -13,6 +13,7 @@ export function CreateAgent() {
   const [claudeMd, setClaudeMd] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
   const [skipPermissions, setSkipPermissions] = useState(false);
   const [fullAuto, setFullAuto] = useState(false);
   const [resumeSession, setResumeSession] = useState('');
@@ -69,6 +70,7 @@ export function CreateAgent() {
         claudeMd: claudeMd || undefined,
         adminEmail: adminEmail || undefined,
         whatsappPhone: whatsappPhone || undefined,
+        slackWebhookUrl: slackWebhookUrl || undefined,
         flags: {
           dangerouslySkipPermissions: skipPermissions || undefined,
           fullAuto: fullAuto || undefined,
@@ -261,6 +263,16 @@ export function CreateAgent() {
           onChange={(e) => setWhatsappPhone(e.target.value)}
           placeholder={t('create.whatsappPhonePlaceholder')}
           type="tel"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>{t('create.slackWebhook')}</label>
+        <input
+          value={slackWebhookUrl}
+          onChange={(e) => setSlackWebhookUrl(e.target.value)}
+          placeholder={t('create.slackWebhookPlaceholder')}
+          type="url"
         />
       </div>
 

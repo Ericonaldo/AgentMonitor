@@ -25,6 +25,7 @@ export interface Agent {
     claudeMd?: string;
     adminEmail?: string;
     whatsappPhone?: string;
+    slackWebhookUrl?: string;
     flags: Record<string, unknown>;
   };
   worktreePath?: string;
@@ -86,6 +87,7 @@ export interface MetaAgentConfig {
   pollIntervalMs: number;
   adminEmail?: string;
   whatsappPhone?: string;
+  slackWebhookUrl?: string;
   stuckTimeoutMs?: number;
 }
 
@@ -105,6 +107,7 @@ export const api = {
     claudeMd?: string;
     adminEmail?: string;
     whatsappPhone?: string;
+    slackWebhookUrl?: string;
     flags?: Record<string, unknown>;
   }) => request<Agent>('/agents', { method: 'POST', body: JSON.stringify(data) }),
   stopAgent: (id: string) =>

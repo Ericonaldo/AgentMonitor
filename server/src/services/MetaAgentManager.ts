@@ -3,6 +3,7 @@ import type { AgentStore } from '../store/AgentStore.js';
 import type { AgentManager } from './AgentManager.js';
 import type { EmailNotifier } from './EmailNotifier.js';
 import type { WhatsAppNotifier } from './WhatsAppNotifier.js';
+import type { SlackNotifier } from './SlackNotifier.js';
 import type { PipelineTask, MetaAgentConfig } from '../models/Task.js';
 import type { AgentProvider } from '../models/Agent.js';
 
@@ -21,6 +22,7 @@ export class MetaAgentManager extends EventEmitter {
   private agentManager: AgentManager;
   private emailNotifier: EmailNotifier | null;
   private whatsappNotifier: WhatsAppNotifier | null;
+  private slackNotifier: SlackNotifier | null;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
@@ -29,12 +31,14 @@ export class MetaAgentManager extends EventEmitter {
     agentManager: AgentManager,
     emailNotifier?: EmailNotifier,
     whatsappNotifier?: WhatsAppNotifier,
+    slackNotifier?: SlackNotifier,
   ) {
     super();
     this.store = store;
     this.agentManager = agentManager;
     this.emailNotifier = emailNotifier || null;
     this.whatsappNotifier = whatsappNotifier || null;
+    this.slackNotifier = slackNotifier || null;
   }
 
   getConfig(): MetaAgentConfig {
@@ -233,6 +237,9 @@ export class MetaAgentManager extends EventEmitter {
     if (cfg.whatsappPhone && this.whatsappNotifier) {
       await this.whatsappNotifier.sendNotification(cfg.whatsappPhone, body);
     }
+    if (cfg.slackWebhookUrl && this.slackNotifier) {
+      await this.slackNotifier.sendNotification(body, cfg.slackWebhookUrl);
+    }
   }
 
   private async notifyStuckAgent(task: PipelineTask, agentName: string, waitingMs: number): Promise<void> {
@@ -247,6 +254,9 @@ export class MetaAgentManager extends EventEmitter {
     if (cfg.whatsappPhone && this.whatsappNotifier) {
       await this.whatsappNotifier.sendNotification(cfg.whatsappPhone, body);
     }
+    if (cfg.slackWebhookUrl && this.slackNotifier) {
+      await this.slackNotifier.sendNotification(body, cfg.slackWebhookUrl);
+    }
   }
 
   private async notifyPipelineComplete(completedCount: number, failedCount: number): Promise<void> {
@@ -260,6 +270,9 @@ export class MetaAgentManager extends EventEmitter {
     }
     if (cfg.whatsappPhone && this.whatsappNotifier) {
       await this.whatsappNotifier.sendNotification(cfg.whatsappPhone, body);
+    }
+    if (cfg.slackWebhookUrl && this.slackNotifier) {
+      await this.slackNotifier.sendNotification(body, cfg.slackWebhookUrl);
     }
   }
 
