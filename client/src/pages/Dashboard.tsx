@@ -7,6 +7,8 @@ import { useTranslation } from '../i18n';
 export function Dashboard() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [retentionHours, setRetentionHours] = useState(24);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -21,8 +23,23 @@ export function Dashboard() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const s = await api.getSettings();
+      setRetentionHours(s.agentRetentionMs / 3_600_000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    await api.updateSettings({ agentRetentionMs: retentionHours * 3_600_000 });
+    setShowSettings(false);
+  };
+
   useEffect(() => {
     fetchAgents();
+    fetchSettings();
 
     const socket = getSocket();
     socket.on('agent:status', () => {
@@ -82,6 +99,9 @@ export function Dashboard() {
               {t('dashboard.stopAll')}
             </button>
           )}
+          <button className="btn btn-outline" onClick={() => setShowSettings(true)} title={t('dashboard.settings')}>
+            &#9881;
+          </button>
         </div>
       </div>
 
@@ -137,6 +157,36 @@ export function Dashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showSettings && (
+        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>{t('dashboard.settings')}</h2>
+            <div className="form-group">
+              <label>{t('dashboard.retentionHours')}</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={retentionHours}
+                onChange={(e) => setRetentionHours(Math.max(0, Number(e.target.value)))}
+                placeholder={t('dashboard.retentionDisabled')}
+              />
+              {retentionHours === 0 && (
+                <small style={{ color: 'var(--text-muted)' }}>{t('dashboard.retentionDisabled')}</small>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
+              <button className="btn btn-outline" onClick={() => setShowSettings(false)}>
+                {t('common.cancel')}
+              </button>
+              <button className="btn" onClick={handleSaveSettings}>
+                {t('common.save')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -89,6 +89,10 @@ export interface MetaAgentConfig {
   stuckTimeoutMs?: number;
 }
 
+export interface ServerSettings {
+  agentRetentionMs: number;
+}
+
 export const api = {
   // Agents
   getAgents: () => request<Agent[]>('/agents'),
@@ -173,4 +177,9 @@ export const api = {
   startMetaAgent: () => request('/tasks/meta/start', { method: 'POST' }),
   stopMetaAgent: () => request('/tasks/meta/stop', { method: 'POST' }),
   getMetaStatus: () => request<{ running: boolean }>('/tasks/meta/status'),
+
+  // Server Settings
+  getSettings: () => request<ServerSettings>('/settings'),
+  updateSettings: (data: Partial<ServerSettings>) =>
+    request<ServerSettings>('/settings', { method: 'PUT', body: JSON.stringify(data) }),
 };

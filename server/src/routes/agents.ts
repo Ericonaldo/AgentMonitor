@@ -1,5 +1,27 @@
 import { Router } from 'express';
 import type { AgentManager } from '../services/AgentManager.js';
+import type { AgentStore } from '../store/AgentStore.js';
+
+export function settingsRoutes(store: AgentStore): Router {
+  const router = Router();
+
+  router.get('/', (_req, res) => {
+    res.json(store.getSettings());
+  });
+
+  router.put('/', (req, res) => {
+    const current = store.getSettings();
+    const updated = { ...current, ...req.body };
+    if (typeof updated.agentRetentionMs !== 'number' || updated.agentRetentionMs < 0) {
+      res.status(400).json({ error: 'agentRetentionMs must be a non-negative number' });
+      return;
+    }
+    store.saveSettings(updated);
+    res.json(updated);
+  });
+
+  return router;
+}
 
 export function agentRoutes(manager: AgentManager): Router {
   const router = Router();

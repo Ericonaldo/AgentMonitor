@@ -34,6 +34,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.stopAll': 'Stop All',
     'dashboard.empty': 'No agents running. Create one to get started.',
     'dashboard.noMessages': 'No messages yet',
+    'dashboard.settings': 'Settings',
+    'dashboard.retentionHours': 'Auto-delete stopped agents after (hours)',
+    'dashboard.retentionDisabled': 'Disabled (0 = keep forever)',
+    'dashboard.settingsSaved': 'Settings saved',
 
     // Create Agent
     'create.title': 'Create Agent',
@@ -206,6 +210,10 @@ export const translations: Record<Language, Record<string, string>> = {
     'dashboard.stopAll': '全部停止',
     'dashboard.empty': '暂无运行中的代理。创建一个开始使用。',
     'dashboard.noMessages': '暂无消息',
+    'dashboard.settings': '设置',
+    'dashboard.retentionHours': '自动删除已停止代理（小时后）',
+    'dashboard.retentionDisabled': '已禁用（0 = 永久保留）',
+    'dashboard.settingsSaved': '设置已保存',
 
     // Create Agent
     'create.title': '创建代理',

@@ -365,4 +365,21 @@ export class AgentManager extends EventEmitter {
   getAllAgents(): Agent[] {
     return this.store.getAllAgents();
   }
+
+  async cleanupExpiredAgents(retentionMs: number): Promise<number> {
+    if (retentionMs <= 0) return 0;
+    const now = Date.now();
+    const agents = this.store.getAllAgents();
+    let count = 0;
+    for (const agent of agents) {
+      if (
+        (agent.status === 'stopped' || agent.status === 'error') &&
+        agent.lastActivity + retentionMs < now
+      ) {
+        await this.deleteAgent(agent.id);
+        count++;
+      }
+    }
+    return count;
+  }
 }

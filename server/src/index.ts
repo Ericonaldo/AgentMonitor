@@ -10,7 +10,7 @@ import { AgentManager } from './services/AgentManager.js';
 import { MetaAgentManager } from './services/MetaAgentManager.js';
 import { EmailNotifier } from './services/EmailNotifier.js';
 import { WhatsAppNotifier } from './services/WhatsAppNotifier.js';
-import { agentRoutes } from './routes/agents.js';
+import { agentRoutes, settingsRoutes } from './routes/agents.js';
 import { templateRoutes } from './routes/templates.js';
 import { sessionRoutes } from './routes/sessions.js';
 import { directoryRoutes } from './routes/directories.js';
@@ -41,6 +41,7 @@ export function createApp() {
   app.use('/api/sessions', sessionRoutes());
   app.use('/api/directories', directoryRoutes());
   app.use('/api/tasks', taskRoutes(store, metaAgent));
+  app.use('/api/settings', settingsRoutes(store));
 
   // Health check
   app.get('/api/health', (_req, res) => {
@@ -75,7 +76,22 @@ export function createApp() {
     io.emit('meta:status', { running: status === 'running' });
   });
 
-  return { app, httpServer, io, store, manager, metaAgent };
+  // Auto-cleanup expired stopped/error agents every 60s
+  const cleanupInterval = setInterval(async () => {
+    const { agentRetentionMs } = store.getSettings();
+    if (agentRetentionMs <= 0) return;
+    try {
+      const count = await manager.cleanupExpiredAgents(agentRetentionMs);
+      if (count > 0) {
+        console.log(`[Cleanup] Auto-deleted ${count} expired agent(s)`);
+        io.emit('agent:status', null, 'deleted');
+      }
+    } catch (err) {
+      console.error('[Cleanup] Error during agent cleanup:', err);
+    }
+  }, 60_000);
+
+  return { app, httpServer, io, store, manager, metaAgent, cleanupInterval };
 }
 
 // Only start server if this is the main module

@@ -5,15 +5,25 @@ import type { Agent } from '../models/Agent.js';
 import type { Template } from '../models/Template.js';
 import type { PipelineTask, MetaAgentConfig } from '../models/Task.js';
 
+export interface ServerSettings {
+  agentRetentionMs: number; // default 86400000 (24h), 0 = disabled
+}
+
+const DEFAULT_SETTINGS: ServerSettings = {
+  agentRetentionMs: 86_400_000, // 24 hours
+};
+
 export class AgentStore {
   private agents: Map<string, Agent> = new Map();
   private templates: Map<string, Template> = new Map();
   private tasks: Map<string, PipelineTask> = new Map();
   private metaConfig: MetaAgentConfig | null = null;
+  private settings: ServerSettings = { ...DEFAULT_SETTINGS };
   private agentsFile: string;
   private templatesFile: string;
   private tasksFile: string;
   private metaConfigFile: string;
+  private settingsFile: string;
 
   constructor(dataDir?: string) {
     const dir = dataDir || config.dataDir;
@@ -22,6 +32,7 @@ export class AgentStore {
     this.templatesFile = path.join(dir, 'templates.json');
     this.tasksFile = path.join(dir, 'tasks.json');
     this.metaConfigFile = path.join(dir, 'meta-agent.json');
+    this.settingsFile = path.join(dir, 'settings.json');
     this.load();
   }
 
@@ -59,6 +70,13 @@ export class AgentStore {
     if (fs.existsSync(this.metaConfigFile)) {
       try {
         this.metaConfig = JSON.parse(fs.readFileSync(this.metaConfigFile, 'utf-8'));
+      } catch {
+        // ignore corrupt file
+      }
+    }
+    if (fs.existsSync(this.settingsFile)) {
+      try {
+        this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(this.settingsFile, 'utf-8')) };
       } catch {
         // ignore corrupt file
       }
@@ -172,5 +190,15 @@ export class AgentStore {
   saveMetaAgentConfig(cfg: MetaAgentConfig): void {
     this.metaConfig = cfg;
     this.saveMetaConfig();
+  }
+
+  // Server settings methods
+  getSettings(): ServerSettings {
+    return { ...this.settings };
+  }
+
+  saveSettings(settings: ServerSettings): void {
+    this.settings = { ...settings };
+    fs.writeFileSync(this.settingsFile, JSON.stringify(this.settings, null, 2));
   }
 }
