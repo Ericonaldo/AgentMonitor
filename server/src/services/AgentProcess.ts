@@ -1,58 +1,74 @@
 import { ChildProcess, spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import { config } from '../config.js';
+import type { AgentProvider } from '../models/Agent.js';
 
 export interface StreamMessage {
   type: string;
   subtype?: string;
-  // assistant message
+  // claude: assistant message
   content_block_type?: string;
   text?: string;
-  // tool use
+  // claude: tool use
   tool_name?: string;
-  // result
+  // claude: result
   result?: {
     cost_usd?: number;
     session_id?: string;
     is_error?: boolean;
   };
+  // codex: item.completed
+  item?: {
+    id?: string;
+    type?: string;
+    text?: string;
+  };
+  // codex: turn.completed usage
+  usage?: {
+    input_tokens?: number;
+    cached_input_tokens?: number;
+    output_tokens?: number;
+  };
+  // codex: thread info
+  thread_id?: string;
   // generic
   [key: string]: unknown;
+}
+
+export interface ProcessStartOpts {
+  provider: AgentProvider;
+  directory: string;
+  prompt: string;
+  dangerouslySkipPermissions?: boolean;
+  resume?: string;
+  model?: string;
+  fullAuto?: boolean;
 }
 
 export class AgentProcess extends EventEmitter {
   private process: ChildProcess | null = null;
   private buffer = '';
   private _pid: number | undefined;
+  private _provider: AgentProvider = 'claude';
 
   get pid(): number | undefined {
     return this._pid;
+  }
+
+  get provider(): AgentProvider {
+    return this._provider;
   }
 
   get isRunning(): boolean {
     return this.process !== null && !this.process.killed;
   }
 
-  start(opts: {
-    directory: string;
-    prompt: string;
-    dangerouslySkipPermissions?: boolean;
-    resume?: string;
-  }): void {
-    const args: string[] = [
-      '-p', opts.prompt,
-      '--output-format', 'stream-json',
-    ];
+  start(opts: ProcessStartOpts): void {
+    this._provider = opts.provider;
 
-    if (opts.dangerouslySkipPermissions) {
-      args.push('--dangerously-skip-permissions');
-    }
+    const { bin, args } = this.buildCommand(opts);
 
-    if (opts.resume) {
-      args.push('--resume', opts.resume);
-    }
-
-    this.process = spawn(config.claudeBin, args, {
+    this.process = spawn(bin, args, {
       cwd: opts.directory,
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env },
@@ -80,6 +96,58 @@ export class AgentProcess extends EventEmitter {
     });
   }
 
+  private buildCommand(opts: ProcessStartOpts): { bin: string; args: string[] } {
+    if (opts.provider === 'codex') {
+      return this.buildCodexCommand(opts);
+    }
+    return this.buildClaudeCommand(opts);
+  }
+
+  private buildClaudeCommand(opts: ProcessStartOpts): { bin: string; args: string[] } {
+    const args: string[] = [
+      '-p', opts.prompt,
+      '--output-format', 'stream-json',
+    ];
+
+    if (opts.dangerouslySkipPermissions) {
+      args.push('--dangerously-skip-permissions');
+    }
+
+    if (opts.resume) {
+      args.push('--resume', opts.resume);
+    }
+
+    if (opts.model) {
+      args.push('--model', opts.model);
+    }
+
+    return { bin: config.claudeBin, args };
+  }
+
+  private buildCodexCommand(opts: ProcessStartOpts): { bin: string; args: string[] } {
+    const args: string[] = [
+      'exec',
+      '--json',
+      opts.prompt,
+    ];
+
+    if (opts.dangerouslySkipPermissions) {
+      args.push('--dangerously-bypass-approvals-and-sandbox');
+    } else if (opts.fullAuto) {
+      args.push('--full-auto');
+    }
+
+    if (opts.model) {
+      args.push('--model', opts.model);
+    }
+
+    // Codex uses --cd instead of cwd for working directory, but we also set cwd
+    args.push('--cd', opts.directory);
+    args.push('--skip-git-repo-check');
+
+    return { bin: config.codexBin, args };
+  }
+
   private processBuffer(): void {
     const lines = this.buffer.split('\n');
     // Keep the last incomplete line in the buffer
@@ -101,11 +169,17 @@ export class AgentProcess extends EventEmitter {
 
   sendMessage(text: string): void {
     if (this.process?.stdin?.writable) {
-      const msg = JSON.stringify({
-        type: 'user_message',
-        content: text,
-      });
-      this.process.stdin.write(msg + '\n');
+      if (this._provider === 'claude') {
+        const msg = JSON.stringify({
+          type: 'user_message',
+          content: text,
+        });
+        this.process.stdin.write(msg + '\n');
+      } else {
+        // Codex exec doesn't support stdin interaction
+        // but we write anyway in case future versions do
+        this.process.stdin.write(text + '\n');
+      }
     }
   }
 

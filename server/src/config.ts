@@ -7,6 +7,7 @@ export const config = {
   port: parseInt(process.env.PORT || '3456', 10),
   dataDir: path.resolve(__dirname, '..', 'data'),
   claudeBin: process.env.CLAUDE_BIN || 'claude',
+  codexBin: process.env.CODEX_BIN || 'codex',
   smtp: {
     host: process.env.SMTP_HOST || '',
     port: parseInt(process.env.SMTP_PORT || '587', 10),

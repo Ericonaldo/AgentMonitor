@@ -442,6 +442,60 @@ body {
   padding: 4px;
 }
 
+/* Provider selector */
+.provider-selector {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.provider-btn {
+  padding: 8px 20px;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.provider-btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.provider-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.provider-btn:hover:not(.active) {
+  background: var(--border);
+}
+
+/* Provider badges */
+.provider-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+.provider-claude {
+  background: #d97706;
+  color: white;
+}
+
+.provider-codex {
+  background: #10a37f;
+  color: white;
+}
+
 /* CLAUDE.md editor */
 .claudemd-editor {
   margin-top: 12px;

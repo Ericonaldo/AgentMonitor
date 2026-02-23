@@ -96,7 +96,12 @@ export function Dashboard() {
               onClick={() => navigate(`/agent/${agent.id}`)}
             >
               <div className="card-header">
-                <span className="card-name">{agent.name}</span>
+                <span className="card-name">
+                  <span className={`provider-badge provider-${agent.config.provider || 'claude'}`}>
+                    {(agent.config.provider || 'claude').toUpperCase()}
+                  </span>
+                  {' '}{agent.name}
+                </span>
                 <span className={`status status-${agent.status}`}>
                   <span className="status-dot" />
                   {agent.status}

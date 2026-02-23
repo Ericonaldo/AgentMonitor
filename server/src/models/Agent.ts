@@ -1,4 +1,5 @@
 export type AgentStatus = 'running' | 'stopped' | 'error' | 'waiting_input';
+export type AgentProvider = 'claude' | 'codex';
 
 export interface AgentMessage {
   id: string;
@@ -8,6 +9,7 @@ export interface AgentMessage {
 }
 
 export interface AgentConfig {
+  provider: AgentProvider;
   directory: string;
   prompt: string;
   claudeMd?: string;
@@ -15,6 +17,8 @@ export interface AgentConfig {
   flags: {
     dangerouslySkipPermissions?: boolean;
     resume?: string;
+    model?: string;
+    fullAuto?: boolean;
   };
 }
 
@@ -30,4 +34,5 @@ export interface Agent {
   createdAt: number;
   costUsd?: number;
   pid?: number;
+  tokenUsage?: { input: number; output: number };
 }

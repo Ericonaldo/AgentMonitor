@@ -173,10 +173,16 @@ export function AgentChat() {
     <div className="chat-container">
       <div className="chat-header">
         <div>
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>{agent.name}</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 600 }}>
+            <span className={`provider-badge provider-${agent.config.provider || 'claude'}`}>
+              {(agent.config.provider || 'claude').toUpperCase()}
+            </span>
+            {' '}{agent.name}
+          </h2>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
             {agent.config.directory}
             {agent.costUsd !== undefined && ` | $${agent.costUsd.toFixed(4)}`}
+            {agent.tokenUsage && ` | ${agent.tokenUsage.input + agent.tokenUsage.output} tokens`}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, type Template, type SessionInfo, type DirListing } from '../api/client';
+import { api, type AgentProvider, type Template, type SessionInfo, type DirListing } from '../api/client';
 
 export function CreateAgent() {
   const navigate = useNavigate();
+  const [provider, setProvider] = useState<AgentProvider>('claude');
   const [name, setName] = useState('');
   const [directory, setDirectory] = useState('');
   const [prompt, setPrompt] = useState('');
   const [claudeMd, setClaudeMd] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
   const [skipPermissions, setSkipPermissions] = useState(false);
+  const [fullAuto, setFullAuto] = useState(false);
   const [resumeSession, setResumeSession] = useState('');
+  const [model, setModel] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
 
@@ -57,13 +60,16 @@ export function CreateAgent() {
     try {
       const agent = await api.createAgent({
         name,
+        provider,
         directory,
         prompt,
         claudeMd: claudeMd || undefined,
         adminEmail: adminEmail || undefined,
         flags: {
           dangerouslySkipPermissions: skipPermissions || undefined,
+          fullAuto: fullAuto || undefined,
           resume: resumeSession || undefined,
+          model: model || undefined,
         },
       });
       navigate(`/agent/${agent.id}`);
@@ -84,6 +90,26 @@ export function CreateAgent() {
           {error}
         </div>
       )}
+
+      <div className="form-group">
+        <label>Provider</label>
+        <div className="provider-selector">
+          <button
+            className={`provider-btn ${provider === 'claude' ? 'active' : ''}`}
+            onClick={() => setProvider('claude')}
+            type="button"
+          >
+            Claude Code
+          </button>
+          <button
+            className={`provider-btn ${provider === 'codex' ? 'active' : ''}`}
+            onClick={() => setProvider('codex')}
+            type="button"
+          >
+            Codex
+          </button>
+        </div>
+      </div>
 
       <div className="form-group">
         <label>Name</label>
@@ -142,6 +168,15 @@ export function CreateAgent() {
       </div>
 
       <div className="form-group">
+        <label>Model (optional)</label>
+        <input
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          placeholder={provider === 'claude' ? 'e.g. claude-sonnet-4-5-20250514' : 'e.g. o3'}
+        />
+      </div>
+
+      <div className="form-group">
         <label>Flags</label>
         <div className="checkbox-group">
           <label className="checkbox-label">
@@ -150,22 +185,36 @@ export function CreateAgent() {
               checked={skipPermissions}
               onChange={(e) => setSkipPermissions(e.target.checked)}
             />
-            --dangerously-skip-permissions
+            {provider === 'claude'
+              ? '--dangerously-skip-permissions'
+              : '--dangerously-bypass-approvals-and-sandbox'}
           </label>
+          {provider === 'codex' && (
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={fullAuto}
+                onChange={(e) => setFullAuto(e.target.checked)}
+              />
+              --full-auto
+            </label>
+          )}
         </div>
       </div>
 
-      <div className="form-group">
-        <label>Resume Previous Session</label>
-        <select value={resumeSession} onChange={(e) => setResumeSession(e.target.value)}>
-          <option value="">New session</option>
-          {sessions.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.projectPath} - {new Date(s.lastModified).toLocaleString()}
-            </option>
-          ))}
-        </select>
-      </div>
+      {provider === 'claude' && (
+        <div className="form-group">
+          <label>Resume Previous Session</label>
+          <select value={resumeSession} onChange={(e) => setResumeSession(e.target.value)}>
+            <option value="">New session</option>
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.projectPath} - {new Date(s.lastModified).toLocaleString()}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="form-group">
         <label>

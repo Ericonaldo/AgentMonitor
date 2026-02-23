@@ -23,7 +23,7 @@ export function agentRoutes(manager: AgentManager): Router {
   // Create agent
   router.post('/', async (req, res) => {
     try {
-      const { name, directory, prompt, claudeMd, adminEmail, flags } = req.body;
+      const { name, directory, prompt, claudeMd, adminEmail, flags, provider } = req.body;
 
       if (!name || !directory || !prompt) {
         res.status(400).json({ error: 'name, directory, and prompt are required' });
@@ -31,6 +31,7 @@ export function agentRoutes(manager: AgentManager): Router {
       }
 
       const agent = await manager.createAgent(name, {
+        provider: provider || 'claude',
         directory,
         prompt,
         claudeMd,

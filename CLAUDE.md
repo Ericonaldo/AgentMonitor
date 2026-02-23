@@ -8,18 +8,32 @@
 7. The user can click into each card and will enter a web-based agent gui page, which is similar to ChatGPT, but the user can use similar commands here as the original bash-based user, for claude such as twice esc, and support `/` hints, and so on, basically like a bash in web8. Each agent should work with git worktree (each worktree should have a seperate claude.md), so that if different agents work in the same directory, they should use different branches to avoid conflictThe monitor allows basic usage as the user manually manipulates each agent and makes new agents. 
 9. When some agent needs human interaction, send a email to the admin user to notify him, if no email is filled, just wait.
 
+# Premium ability meta agent that serves as an agent manager.
+The agent manager runs in a while true loop doing one thing (fetch the latest task list, then create agent to do)
+The user can add consequence tasks or parallel tasks. For consequence tasks, the manager should be able to a) know the former task ended, then close prev agent and create a new agent to run the next task
+The agent manager is also a claude agent, the user can change its claude.md or simply used the default one, we have to make a default one.
+The agent manager should be able to understand what each agent is doing and create them sufficient permissions like chrome, also should be able to change their claude.md as needed.
+
 # Your job
-Keep working until confirmed all features works, passed with test
+Keep working until confirmed all features works, passed with test. for premium ability, need to finish a small project managed by the agent manager
 
-3. **实现功能**：Claude Code 在隔离环境中工作  
+Use this tool to further develop future functions
 
-4. **提交代码**：`git commit` 在任务分支  
+After every new function developed, update the related doc.
 
-5. **Merge + 测试**：
+Now try to support codex, all requirements are same to claude code. use your bash and chrome mcp to verify all functions.
+
+Keep working until all functions confirmed working.
+
+**实现功能**：Claude Code + Codex 在隔离环境中工作  
+
+**提交代码**：`git commit` 在任务分支  
+
+**Merge + 测试**：
    - `git fetch origin && git merge origin/main`
    - `npm test`  
 
-6. **自动commit and合并到 main**：
+**自动commit and合并到 main**：
 after each feature done and tested pass, should commit then merge to main
    - `git fetch origin main`
    - `git rebase origin/main`，如果失败，按照下面的“冲突处理”来 resolve rebase conflict
@@ -29,14 +43,14 @@ after each feature done and tested pass, should commit then merge to main
      - 继续执行下一步
    - 如果这一步有任何失败，则退回到步骤 5  
 
-7. **标记完成**：更新 `dev-tasks.json`（必须在清理之前，防止进程被杀时任务状态丢失）  
+**标记完成**：更新 `dev-tasks.json`（必须在清理之前，防止进程被杀时任务状态丢失）  
 
-8. **清理**：
+**清理**：
    - `git worktree remove` + 删除本地分支
    - 删除远程 task 分支
    - 重启 dev server  
 
-9. **经验沉淀**：在 `PROGRESS.md` 记录经验教训（可选，如果被杀也不影响任务状态）
+**经验沉淀**：在 `PROGRESS.md` 记录经验教训（可选，如果被杀也不影响任务状态）
 
 ## 多实例并行开发（Git Worktree）
 

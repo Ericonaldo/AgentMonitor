@@ -64,7 +64,7 @@ export class AgentManager extends EventEmitter {
     this.processes.set(agent.id, proc);
 
     proc.on('message', (msg: StreamMessage) => {
-      this.handleStreamMessage(agent.id, msg);
+      this.handleStreamMessage(agent.id, msg, agent.config.provider);
     });
 
     proc.on('stderr', (text: string) => {
@@ -82,73 +82,127 @@ export class AgentManager extends EventEmitter {
     });
 
     proc.start({
+      provider: agent.config.provider,
       directory: agent.worktreePath || agent.config.directory,
       prompt: agent.config.prompt,
       dangerouslySkipPermissions: agent.config.flags.dangerouslySkipPermissions,
       resume: agent.config.flags.resume,
+      model: agent.config.flags.model,
+      fullAuto: agent.config.flags.fullAuto,
     });
 
     agent.pid = proc.pid;
     this.store.saveAgent(agent);
   }
 
-  private handleStreamMessage(agentId: string, msg: StreamMessage): void {
+  private handleStreamMessage(agentId: string, msg: StreamMessage, provider: string): void {
     const agent = this.store.getAgent(agentId);
     if (!agent) return;
 
-    // Build message from stream
-    if (msg.type === 'assistant' && msg.subtype === 'text') {
-      const message: AgentMessage = {
-        id: uuid(),
-        role: 'assistant',
-        content: msg.text || '',
-        timestamp: Date.now(),
-      };
-      agent.messages.push(message);
-      agent.lastActivity = Date.now();
-      this.store.saveAgent(agent);
-    }
-
-    if (msg.type === 'assistant' && msg.subtype === 'tool_use') {
-      const message: AgentMessage = {
-        id: uuid(),
-        role: 'tool',
-        content: `Using tool: ${msg.tool_name || 'unknown'}`,
-        timestamp: Date.now(),
-      };
-      agent.messages.push(message);
-      agent.lastActivity = Date.now();
-      this.store.saveAgent(agent);
-    }
-
-    // Handle result with cost
-    if (msg.type === 'result') {
-      if (msg.result?.cost_usd) {
-        agent.costUsd = msg.result.cost_usd;
-      }
-      this.updateAgentStatus(agentId, 'stopped');
-    }
-
-    // Detect permission / human interaction needed
-    if (this.isPermissionPrompt(msg)) {
-      this.updateAgentStatus(agentId, 'waiting_input');
-      if (agent.config.adminEmail) {
-        this.emailNotifier.notifyHumanNeeded(
-          agent.config.adminEmail,
-          agent.name,
-          `Agent is waiting for permission/input.\nLast message: ${msg.text || JSON.stringify(msg)}`,
-        );
-      }
+    if (provider === 'codex') {
+      this.handleCodexMessage(agent, msg);
+    } else {
+      this.handleClaudeMessage(agent, msg);
     }
 
     // Emit to socket
     this.emit('agent:message', agentId, msg);
   }
 
-  private isPermissionPrompt(msg: StreamMessage): boolean {
+  private handleClaudeMessage(agent: Agent, msg: StreamMessage): void {
+    if (msg.type === 'assistant' && msg.subtype === 'text') {
+      agent.messages.push({
+        id: uuid(),
+        role: 'assistant',
+        content: msg.text || '',
+        timestamp: Date.now(),
+      });
+      agent.lastActivity = Date.now();
+      this.store.saveAgent(agent);
+    }
+
+    if (msg.type === 'assistant' && msg.subtype === 'tool_use') {
+      agent.messages.push({
+        id: uuid(),
+        role: 'tool',
+        content: `Using tool: ${msg.tool_name || 'unknown'}`,
+        timestamp: Date.now(),
+      });
+      agent.lastActivity = Date.now();
+      this.store.saveAgent(agent);
+    }
+
+    if (msg.type === 'result') {
+      if (msg.result?.cost_usd) {
+        agent.costUsd = msg.result.cost_usd;
+      }
+      this.updateAgentStatus(agent.id, 'stopped');
+    }
+
+    if (this.isClaudePermissionPrompt(msg)) {
+      this.handleWaitingInput(agent, msg);
+    }
+  }
+
+  private handleCodexMessage(agent: Agent, msg: StreamMessage): void {
+    // Codex JSONL events: thread.started, turn.started, item.completed, turn.completed
+    if (msg.type === 'item.completed' && msg.item) {
+      if (msg.item.type === 'agent_message') {
+        agent.messages.push({
+          id: uuid(),
+          role: 'assistant',
+          content: msg.item.text || '',
+          timestamp: Date.now(),
+        });
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      } else if (msg.item.type === 'tool_call' || msg.item.type === 'function_call') {
+        agent.messages.push({
+          id: uuid(),
+          role: 'tool',
+          content: `Tool: ${msg.item.text || JSON.stringify(msg.item)}`,
+          timestamp: Date.now(),
+        });
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      } else if (msg.item.type === 'reasoning') {
+        agent.messages.push({
+          id: uuid(),
+          role: 'system',
+          content: msg.item.text || '',
+          timestamp: Date.now(),
+        });
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      }
+    }
+
+    if (msg.type === 'turn.completed') {
+      if (msg.usage) {
+        agent.tokenUsage = {
+          input: (agent.tokenUsage?.input || 0) + (msg.usage.input_tokens || 0),
+          output: (agent.tokenUsage?.output || 0) + (msg.usage.output_tokens || 0),
+        };
+        this.store.saveAgent(agent);
+      }
+    }
+  }
+
+  private isClaudePermissionPrompt(msg: StreamMessage): boolean {
     if (msg.type === 'assistant' && msg.subtype === 'permission') return true;
     const text = (msg.text || '').toLowerCase();
     return text.includes('permission') && text.includes('allow');
+  }
+
+  private handleWaitingInput(agent: Agent, msg: StreamMessage): void {
+    this.updateAgentStatus(agent.id, 'waiting_input');
+    if (agent.config.adminEmail) {
+      this.emailNotifier.notifyHumanNeeded(
+        agent.config.adminEmail,
+        agent.name,
+        `Agent is waiting for permission/input.\nLast message: ${msg.text || msg.item?.text || JSON.stringify(msg)}`,
+      );
+    }
   }
 
   private updateAgentStatus(agentId: string, status: AgentStatus): void {

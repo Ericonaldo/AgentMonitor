@@ -12,11 +12,14 @@ async function request<T>(path: string, opts?: RequestInit): Promise<T> {
   return res.json();
 }
 
+export type AgentProvider = 'claude' | 'codex';
+
 export interface Agent {
   id: string;
   name: string;
   status: 'running' | 'stopped' | 'error' | 'waiting_input';
   config: {
+    provider: AgentProvider;
     directory: string;
     prompt: string;
     claudeMd?: string;
@@ -33,6 +36,7 @@ export interface Agent {
   lastActivity: number;
   createdAt: number;
   costUsd?: number;
+  tokenUsage?: { input: number; output: number };
 }
 
 export interface Template {
@@ -61,6 +65,7 @@ export const api = {
   getAgent: (id: string) => request<Agent>(`/agents/${id}`),
   createAgent: (data: {
     name: string;
+    provider?: AgentProvider;
     directory: string;
     prompt: string;
     claudeMd?: string;
