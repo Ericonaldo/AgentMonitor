@@ -69,10 +69,28 @@ export class AgentManager extends EventEmitter {
 
     proc.on('stderr', (text: string) => {
       console.error(`[Agent ${agent.id}] stderr: ${text}`);
+      // Store stderr in messages for debugging
+      const a = this.store.getAgent(agent.id);
+      if (a) {
+        a.messages.push({
+          id: uuid(),
+          role: 'system',
+          content: `[stderr] ${text}`,
+          timestamp: Date.now(),
+        });
+        a.lastActivity = Date.now();
+        this.store.saveAgent(a);
+      }
     });
 
     proc.on('exit', (code: number | null) => {
-      this.updateAgentStatus(agent.id, code === 0 ? 'stopped' : 'error');
+      // Don't override 'stopped' status (set when result message is received)
+      const current = this.store.getAgent(agent.id);
+      if (current && current.status !== 'stopped') {
+        // null exit code (from SIGTERM/SIGKILL) after result is fine; only real errors are non-zero
+        const status = (code === 0 || code === null) ? 'stopped' : 'error';
+        this.updateAgentStatus(agent.id, status);
+      }
       this.processes.delete(agent.id);
     });
 
@@ -110,33 +128,67 @@ export class AgentManager extends EventEmitter {
   }
 
   private handleClaudeMessage(agent: Agent, msg: StreamMessage): void {
-    if (msg.type === 'assistant' && msg.subtype === 'text') {
-      agent.messages.push({
-        id: uuid(),
-        role: 'assistant',
-        content: msg.text || '',
-        timestamp: Date.now(),
-      });
-      agent.lastActivity = Date.now();
-      this.store.saveAgent(agent);
-    }
+    // With --verbose, assistant messages have: {type: "assistant", message: {content: [{type: "text", text: "..."}]}}
+    if (msg.type === 'assistant') {
+      const message = msg.message as { content?: Array<{ type: string; text?: string; name?: string; input?: unknown }> } | undefined;
+      if (message?.content) {
+        for (const block of message.content) {
+          if (block.type === 'text' && block.text) {
+            agent.messages.push({
+              id: uuid(),
+              role: 'assistant',
+              content: block.text,
+              timestamp: Date.now(),
+            });
+          } else if (block.type === 'tool_use') {
+            agent.messages.push({
+              id: uuid(),
+              role: 'tool',
+              content: `Using tool: ${block.name || 'unknown'}`,
+              timestamp: Date.now(),
+            });
+          }
+        }
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      }
 
-    if (msg.type === 'assistant' && msg.subtype === 'tool_use') {
-      agent.messages.push({
-        id: uuid(),
-        role: 'tool',
-        content: `Using tool: ${msg.tool_name || 'unknown'}`,
-        timestamp: Date.now(),
-      });
-      agent.lastActivity = Date.now();
-      this.store.saveAgent(agent);
+      // Legacy format fallback (subtype-based)
+      if (msg.subtype === 'text' && msg.text) {
+        agent.messages.push({
+          id: uuid(),
+          role: 'assistant',
+          content: msg.text,
+          timestamp: Date.now(),
+        });
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      }
+      if (msg.subtype === 'tool_use') {
+        agent.messages.push({
+          id: uuid(),
+          role: 'tool',
+          content: `Using tool: ${msg.tool_name || 'unknown'}`,
+          timestamp: Date.now(),
+        });
+        agent.lastActivity = Date.now();
+        this.store.saveAgent(agent);
+      }
     }
 
     if (msg.type === 'result') {
-      if (msg.result?.cost_usd) {
-        agent.costUsd = msg.result.cost_usd;
+      // Cost is at top level with --verbose: total_cost_usd
+      const cost = (msg as { total_cost_usd?: number }).total_cost_usd || msg.result?.cost_usd;
+      if (cost) {
+        agent.costUsd = cost;
       }
       this.updateAgentStatus(agent.id, 'stopped');
+
+      // Claude -p with stream-json doesn't exit after result; kill the process
+      const proc = this.processes.get(agent.id);
+      if (proc) {
+        proc.stop();
+      }
     }
 
     if (this.isClaudePermissionPrompt(msg)) {

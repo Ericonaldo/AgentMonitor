@@ -45,6 +45,11 @@ export interface ProcessStartOpts {
   fullAuto?: boolean;
 }
 
+/** Shell-escape a string for use with spawn shell: true */
+function shellEscape(s: string): string {
+  return "'" + s.replace(/'/g, "'\\''") + "'";
+}
+
 export class AgentProcess extends EventEmitter {
   private process: ChildProcess | null = null;
   private buffer = '';
@@ -68,13 +73,23 @@ export class AgentProcess extends EventEmitter {
 
     const { bin, args } = this.buildCommand(opts);
 
+    // Clean env: remove Claude-specific vars to allow nested sessions
+    const cleanEnv = { ...process.env };
+    delete cleanEnv.CLAUDECODE;
+    delete cleanEnv.CLAUDE_CODE_ENTRYPOINT;
+
     this.process = spawn(bin, args, {
       cwd: opts.directory,
       stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env },
+      env: cleanEnv,
+      shell: true,
     });
 
     this._pid = this.process.pid;
+
+    // Close stdin immediately - Claude -p waits for stdin EOF before starting
+    // when stdin is a pipe. The prompt is passed via -p flag on the command line.
+    this.process.stdin?.end();
 
     this.process.stdout?.on('data', (data: Buffer) => {
       this.buffer += data.toString();
@@ -104,9 +119,11 @@ export class AgentProcess extends EventEmitter {
   }
 
   private buildClaudeCommand(opts: ProcessStartOpts): { bin: string; args: string[] } {
+    // Shell-escape the prompt since we use shell: true for spawning
     const args: string[] = [
-      '-p', opts.prompt,
+      '-p', shellEscape(opts.prompt),
       '--output-format', 'stream-json',
+      '--verbose',
     ];
 
     if (opts.dangerouslySkipPermissions) {
@@ -114,21 +131,22 @@ export class AgentProcess extends EventEmitter {
     }
 
     if (opts.resume) {
-      args.push('--resume', opts.resume);
+      args.push('--resume', shellEscape(opts.resume));
     }
 
     if (opts.model) {
-      args.push('--model', opts.model);
+      args.push('--model', shellEscape(opts.model));
     }
 
     return { bin: config.claudeBin, args };
   }
 
   private buildCodexCommand(opts: ProcessStartOpts): { bin: string; args: string[] } {
+    // Shell-escape values that may contain spaces since we use shell: true
     const args: string[] = [
       'exec',
       '--json',
-      opts.prompt,
+      shellEscape(opts.prompt),
     ];
 
     if (opts.dangerouslySkipPermissions) {
@@ -138,11 +156,11 @@ export class AgentProcess extends EventEmitter {
     }
 
     if (opts.model) {
-      args.push('--model', opts.model);
+      args.push('--model', shellEscape(opts.model));
     }
 
     // Codex uses --cd instead of cwd for working directory, but we also set cwd
-    args.push('--cd', opts.directory);
+    args.push('--cd', shellEscape(opts.directory));
     args.push('--skip-git-repo-check');
 
     return { bin: config.codexBin, args };
@@ -168,6 +186,7 @@ export class AgentProcess extends EventEmitter {
   }
 
   sendMessage(text: string): void {
+    // Note: stdin is closed in -p mode. Messages can only be sent in interactive mode.
     if (this.process?.stdin?.writable) {
       if (this._provider === 'claude') {
         const msg = JSON.stringify({

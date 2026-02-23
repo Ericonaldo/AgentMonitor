@@ -3,6 +3,7 @@ import { Dashboard } from './pages/Dashboard';
 import { CreateAgent } from './pages/CreateAgent';
 import { AgentChat } from './pages/AgentChat';
 import { Templates } from './pages/Templates';
+import { Pipeline } from './pages/Pipeline';
 
 export function App() {
   const location = useLocation();
@@ -15,6 +16,9 @@ export function App() {
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
             Dashboard
           </Link>
+          <Link to="/pipeline" className={location.pathname === '/pipeline' ? 'active' : ''}>
+            Pipeline
+          </Link>
           <Link to="/create" className={location.pathname === '/create' ? 'active' : ''}>
             New Agent
           </Link>
@@ -26,6 +30,7 @@ export function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/pipeline" element={<Pipeline />} />
           <Route path="/create" element={<CreateAgent />} />
           <Route path="/agent/:id" element={<AgentChat />} />
           <Route path="/templates" element={<Templates />} />

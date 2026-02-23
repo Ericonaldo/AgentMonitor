@@ -59,6 +59,32 @@ export interface DirListing {
   entries: Array<{ name: string; path: string; isDirectory: boolean }>;
 }
 
+export interface PipelineTask {
+  id: string;
+  name: string;
+  prompt: string;
+  directory?: string;
+  provider?: AgentProvider;
+  model?: string;
+  claudeMd?: string;
+  flags?: Record<string, unknown>;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  agentId?: string;
+  order: number;
+  createdAt: number;
+  completedAt?: number;
+  error?: string;
+}
+
+export interface MetaAgentConfig {
+  running: boolean;
+  agentId?: string;
+  claudeMd: string;
+  defaultDirectory: string;
+  defaultProvider: AgentProvider;
+  pollIntervalMs: number;
+}
+
 export const api = {
   // Agents
   getAgents: () => request<Agent[]>('/agents'),
@@ -110,4 +136,31 @@ export const api = {
   // Directories
   listDirectory: (path?: string) =>
     request<DirListing>(`/directories${path ? `?path=${encodeURIComponent(path)}` : ''}`),
+
+  // Pipeline Tasks
+  getTasks: () => request<PipelineTask[]>('/tasks'),
+  getTask: (id: string) => request<PipelineTask>(`/tasks/${id}`),
+  createTask: (data: {
+    name: string;
+    prompt: string;
+    directory?: string;
+    provider?: AgentProvider;
+    model?: string;
+    claudeMd?: string;
+    flags?: Record<string, unknown>;
+    order?: number;
+  }) => request<PipelineTask>('/tasks', { method: 'POST', body: JSON.stringify(data) }),
+  updateTask: (id: string, data: Partial<PipelineTask>) =>
+    request<PipelineTask>(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteTask: (id: string) => request(`/tasks/${id}`, { method: 'DELETE' }),
+  resetTask: (id: string) => request<PipelineTask>(`/tasks/${id}/reset`, { method: 'POST' }),
+  clearCompletedTasks: () => request('/tasks/actions/clear-completed', { method: 'POST' }),
+
+  // Meta Agent
+  getMetaConfig: () => request<MetaAgentConfig>('/tasks/meta/config'),
+  updateMetaConfig: (data: Partial<MetaAgentConfig>) =>
+    request<MetaAgentConfig>('/tasks/meta/config', { method: 'PUT', body: JSON.stringify(data) }),
+  startMetaAgent: () => request('/tasks/meta/start', { method: 'POST' }),
+  stopMetaAgent: () => request('/tasks/meta/stop', { method: 'POST' }),
+  getMetaStatus: () => request<{ running: boolean }>('/tasks/meta/status'),
 };

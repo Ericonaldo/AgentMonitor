@@ -31,24 +31,29 @@ describe('AgentProcess', () => {
     proc.stop();
   });
 
-  it('emits exit event when process ends', async () => {
+  it('emits exit event when process ends', { timeout: 15000 }, async () => {
     const proc = new AgentProcess();
-    let exitCode: number | null = null;
+    let exited = false;
 
-    proc.on('exit', (code: number | null) => {
-      exitCode = code;
+    proc.on('exit', () => {
+      exited = true;
     });
 
-    // Start with a command that will fail
+    // Start with a command that will either fail or start
     proc.start({
+      provider: 'claude',
       directory: '/tmp',
       prompt: 'test',
     });
 
+    // Give it a brief moment, then force stop
     await new Promise((resolve) => setTimeout(resolve, 500));
+    proc.stop();
 
-    // Process should have exited (claude binary likely not available in test)
-    // The exit or error event should have been emitted
+    // Wait for exit event (shell: true adds a wrapper that takes longer to terminate)
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
+    expect(exited).toBe(true);
     expect(proc.isRunning).toBe(false);
   });
 });
