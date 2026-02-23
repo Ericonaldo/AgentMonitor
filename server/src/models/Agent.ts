@@ -14,6 +14,7 @@ export interface AgentConfig {
   prompt: string;
   claudeMd?: string;
   adminEmail?: string;
+  whatsappPhone?: string;
   flags: {
     dangerouslySkipPermissions?: boolean;
     resume?: string;

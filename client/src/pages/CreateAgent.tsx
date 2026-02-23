@@ -12,6 +12,7 @@ export function CreateAgent() {
   const [prompt, setPrompt] = useState('');
   const [claudeMd, setClaudeMd] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
+  const [whatsappPhone, setWhatsappPhone] = useState('');
   const [skipPermissions, setSkipPermissions] = useState(false);
   const [fullAuto, setFullAuto] = useState(false);
   const [resumeSession, setResumeSession] = useState('');
@@ -67,6 +68,7 @@ export function CreateAgent() {
         prompt,
         claudeMd: claudeMd || undefined,
         adminEmail: adminEmail || undefined,
+        whatsappPhone: whatsappPhone || undefined,
         flags: {
           dangerouslySkipPermissions: skipPermissions || undefined,
           fullAuto: fullAuto || undefined,
@@ -249,6 +251,16 @@ export function CreateAgent() {
           onChange={(e) => setAdminEmail(e.target.value)}
           placeholder={t('create.adminEmailPlaceholder')}
           type="email"
+        />
+      </div>
+
+      <div className="form-group">
+        <label>{t('create.whatsappPhone')}</label>
+        <input
+          value={whatsappPhone}
+          onChange={(e) => setWhatsappPhone(e.target.value)}
+          placeholder={t('create.whatsappPhonePlaceholder')}
+          type="tel"
         />
       </div>
 

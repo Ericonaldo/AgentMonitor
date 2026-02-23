@@ -16,4 +16,9 @@ export const config = {
     pass: process.env.SMTP_PASS || '',
     from: process.env.SMTP_FROM || 'agent-monitor@localhost',
   },
+  whatsapp: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+    authToken: process.env.TWILIO_AUTH_TOKEN || '',
+    fromNumber: process.env.TWILIO_WHATSAPP_FROM || '',
+  },
 };

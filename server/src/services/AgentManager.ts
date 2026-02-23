@@ -5,18 +5,21 @@ import { AgentStore } from '../store/AgentStore.js';
 import { AgentProcess, type StreamMessage } from './AgentProcess.js';
 import { WorktreeManager } from './WorktreeManager.js';
 import { EmailNotifier } from './EmailNotifier.js';
+import { WhatsAppNotifier } from './WhatsAppNotifier.js';
 
 export class AgentManager extends EventEmitter {
   private processes: Map<string, AgentProcess> = new Map();
   private store: AgentStore;
   private worktreeManager: WorktreeManager;
   private emailNotifier: EmailNotifier;
+  private whatsappNotifier: WhatsAppNotifier;
 
-  constructor(store: AgentStore, worktreeManager?: WorktreeManager, emailNotifier?: EmailNotifier) {
+  constructor(store: AgentStore, worktreeManager?: WorktreeManager, emailNotifier?: EmailNotifier, whatsappNotifier?: WhatsAppNotifier) {
     super();
     this.store = store;
     this.worktreeManager = worktreeManager || new WorktreeManager();
     this.emailNotifier = emailNotifier || new EmailNotifier();
+    this.whatsappNotifier = whatsappNotifier || new WhatsAppNotifier();
   }
 
   async createAgent(name: string, agentConfig: AgentConfig): Promise<Agent> {
@@ -248,11 +251,19 @@ export class AgentManager extends EventEmitter {
 
   private handleWaitingInput(agent: Agent, msg: StreamMessage): void {
     this.updateAgentStatus(agent.id, 'waiting_input');
+    const notificationMessage = `Agent is waiting for permission/input.\nLast message: ${msg.text || msg.item?.text || JSON.stringify(msg)}`;
     if (agent.config.adminEmail) {
       this.emailNotifier.notifyHumanNeeded(
         agent.config.adminEmail,
         agent.name,
-        `Agent is waiting for permission/input.\nLast message: ${msg.text || msg.item?.text || JSON.stringify(msg)}`,
+        notificationMessage,
+      );
+    }
+    if (agent.config.whatsappPhone) {
+      this.whatsappNotifier.notifyHumanNeeded(
+        agent.config.whatsappPhone,
+        agent.name,
+        notificationMessage,
       );
     }
   }

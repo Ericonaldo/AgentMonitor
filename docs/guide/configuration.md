@@ -32,6 +32,6 @@ Each agent can have custom instructions via CLAUDE.md content. You can:
 
 Each agent runs in an isolated git worktree to prevent conflicts when multiple agents work in the same repository. Worktrees are created automatically under `.agent-worktrees/` in the target directory.
 
-## Admin Email Notifications
+## Notifications
 
-Set an admin email when creating an agent to receive notifications when the agent needs human interaction.
+Set an admin email or WhatsApp phone number when creating an agent to receive notifications when the agent needs human interaction. See the [Notifications](./notifications.md) guide for full setup details.

@@ -27,6 +27,7 @@ export default defineConfig({
           { text: 'Slash Commands', link: '/guide/slash-commands' },
           { text: 'Pipeline', link: '/guide/pipeline' },
           { text: 'Templates', link: '/guide/templates' },
+          { text: 'Notifications', link: '/guide/notifications' },
           { text: 'i18n', link: '/guide/i18n' },
         ],
       },

@@ -24,6 +24,7 @@ export interface Agent {
     prompt: string;
     claudeMd?: string;
     adminEmail?: string;
+    whatsappPhone?: string;
     flags: Record<string, unknown>;
   };
   worktreePath?: string;
@@ -96,6 +97,7 @@ export const api = {
     prompt: string;
     claudeMd?: string;
     adminEmail?: string;
+    whatsappPhone?: string;
     flags?: Record<string, unknown>;
   }) => request<Agent>('/agents', { method: 'POST', body: JSON.stringify(data) }),
   stopAgent: (id: string) =>
