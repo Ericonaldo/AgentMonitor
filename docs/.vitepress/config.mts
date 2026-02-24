@@ -28,6 +28,7 @@ export default defineConfig({
           { text: 'Pipeline', link: '/guide/pipeline' },
           { text: 'Templates', link: '/guide/templates' },
           { text: 'Notifications', link: '/guide/notifications' },
+          { text: 'Remote Access', link: '/guide/remote-access' },
           { text: 'i18n', link: '/guide/i18n' },
         ],
       },

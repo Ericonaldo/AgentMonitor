@@ -47,6 +47,15 @@ See the [Notifications](./notifications.md) guide for detailed setup instruction
 
 See the [Notifications](./notifications.md) guide for detailed setup instructions.
 
+### Remote Relay
+
+| Variable | Default | Description |
+|---|---|---|
+| `RELAY_URL` | _(none)_ | WebSocket URL of the relay server (e.g., `ws://1.2.3.4:3457/tunnel`) |
+| `RELAY_TOKEN` | _(none)_ | Shared secret for tunnel authentication |
+
+When `RELAY_URL` is not set, relay mode is disabled (local-only). See the [Remote Access](./remote-access.md) guide for full setup.
+
 ## Agent Flags
 
 When creating an agent, you can configure these flags:
@@ -54,10 +63,17 @@ When creating an agent, you can configure these flags:
 ### Claude Code Flags
 - **dangerouslySkipPermissions**: Skip all permission prompts (for sandboxed environments)
 - **chrome**: Enable Chrome browser integration
-- **model**: Specify model (e.g., `claude-sonnet-4-20250514`)
+- **permissionMode**: Permission mode (`default`, `acceptEdits`, `bypassPermissions`, `dontAsk`, `plan`)
+- **maxBudgetUsd**: Maximum dollar amount to spend on API calls
+- **allowedTools**: Comma/space-separated list of allowed tools (e.g., `Bash(git:*) Edit Read`)
+- **disallowedTools**: Comma/space-separated list of denied tools (e.g., `Bash(rm:*) Write`)
+- **addDirs**: Additional directories to allow tool access to (comma-separated)
+- **mcpConfig**: Path to MCP server config JSON file
+- **model**: Specify model (e.g., `claude-sonnet-4-6`)
 
 ### Codex Flags
 - **dangerouslySkipPermissions**: Auto-approve all operations
+- **fullAuto**: Enable full-auto mode
 - **model**: Specify model (e.g., `o4-mini`)
 
 ## CLAUDE.md
