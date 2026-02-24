@@ -113,6 +113,13 @@ export class AgentManager extends EventEmitter {
       resume: agent.config.flags.resume,
       model: agent.config.flags.model,
       fullAuto: agent.config.flags.fullAuto,
+      chrome: agent.config.flags.chrome,
+      permissionMode: agent.config.flags.permissionMode,
+      maxBudgetUsd: agent.config.flags.maxBudgetUsd,
+      allowedTools: agent.config.flags.allowedTools,
+      disallowedTools: agent.config.flags.disallowedTools,
+      addDirs: agent.config.flags.addDirs,
+      mcpConfig: agent.config.flags.mcpConfig,
     });
 
     agent.pid = proc.pid;

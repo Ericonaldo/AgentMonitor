@@ -47,6 +47,13 @@ export interface ProcessStartOpts {
   resume?: string;
   model?: string;
   fullAuto?: boolean;
+  chrome?: boolean;
+  permissionMode?: string;
+  maxBudgetUsd?: number;
+  allowedTools?: string;
+  disallowedTools?: string;
+  addDirs?: string;
+  mcpConfig?: string;
 }
 
 /** Shell-escape a string for use with spawn shell: true */
@@ -140,6 +147,37 @@ export class AgentProcess extends EventEmitter {
 
     if (opts.model) {
       args.push('--model', shellEscape(opts.model));
+    }
+
+    if (opts.chrome) {
+      args.push('--chrome');
+    }
+
+    if (opts.permissionMode) {
+      args.push('--permission-mode', shellEscape(opts.permissionMode));
+    }
+
+    if (opts.maxBudgetUsd && opts.maxBudgetUsd > 0) {
+      args.push('--max-budget-usd', String(opts.maxBudgetUsd));
+    }
+
+    if (opts.allowedTools) {
+      args.push('--allowedTools', shellEscape(opts.allowedTools));
+    }
+
+    if (opts.disallowedTools) {
+      args.push('--disallowedTools', shellEscape(opts.disallowedTools));
+    }
+
+    if (opts.addDirs) {
+      // Support multiple dirs separated by commas or spaces
+      for (const dir of opts.addDirs.split(/[,\s]+/).filter(Boolean)) {
+        args.push('--add-dir', shellEscape(dir));
+      }
+    }
+
+    if (opts.mcpConfig) {
+      args.push('--mcp-config', shellEscape(opts.mcpConfig));
     }
 
     return { bin: config.claudeBin, args };

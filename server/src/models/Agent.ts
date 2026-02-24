@@ -21,6 +21,13 @@ export interface AgentConfig {
     resume?: string;
     model?: string;
     fullAuto?: boolean;
+    chrome?: boolean;
+    permissionMode?: string;
+    maxBudgetUsd?: number;
+    allowedTools?: string;
+    disallowedTools?: string;
+    addDirs?: string;
+    mcpConfig?: string;
   };
 }
 

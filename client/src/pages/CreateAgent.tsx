@@ -16,6 +16,13 @@ export function CreateAgent() {
   const [slackWebhookUrl, setSlackWebhookUrl] = useState('');
   const [skipPermissions, setSkipPermissions] = useState(false);
   const [fullAuto, setFullAuto] = useState(false);
+  const [chrome, setChrome] = useState(false);
+  const [permissionMode, setPermissionMode] = useState('');
+  const [maxBudgetUsd, setMaxBudgetUsd] = useState('');
+  const [allowedTools, setAllowedTools] = useState('');
+  const [disallowedTools, setDisallowedTools] = useState('');
+  const [addDirs, setAddDirs] = useState('');
+  const [mcpConfig, setMcpConfig] = useState('');
   const [resumeSession, setResumeSession] = useState('');
   const [model, setModel] = useState('');
   const [creating, setCreating] = useState(false);
@@ -74,6 +81,13 @@ export function CreateAgent() {
         flags: {
           dangerouslySkipPermissions: skipPermissions || undefined,
           fullAuto: fullAuto || undefined,
+          chrome: chrome || undefined,
+          permissionMode: permissionMode || undefined,
+          maxBudgetUsd: maxBudgetUsd ? Number(maxBudgetUsd) : undefined,
+          allowedTools: allowedTools || undefined,
+          disallowedTools: disallowedTools || undefined,
+          addDirs: addDirs || undefined,
+          mcpConfig: mcpConfig || undefined,
           resume: resumeSession || undefined,
           model: model || undefined,
         },
@@ -205,8 +219,82 @@ export function CreateAgent() {
               --full-auto
             </label>
           )}
+          {provider === 'claude' && (
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={chrome}
+                onChange={(e) => setChrome(e.target.checked)}
+              />
+              --chrome
+            </label>
+          )}
         </div>
       </div>
+
+      {provider === 'claude' && (
+        <>
+          <div className="form-group">
+            <label>--permission-mode</label>
+            <select value={permissionMode} onChange={(e) => setPermissionMode(e.target.value)}>
+              <option value="">Default</option>
+              <option value="default">default</option>
+              <option value="acceptEdits">acceptEdits</option>
+              <option value="bypassPermissions">bypassPermissions</option>
+              <option value="dontAsk">dontAsk</option>
+              <option value="plan">plan</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>--max-budget-usd</label>
+            <input
+              value={maxBudgetUsd}
+              onChange={(e) => setMaxBudgetUsd(e.target.value)}
+              placeholder="e.g. 5.00"
+              type="number"
+              step="0.01"
+              min="0"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>--allowedTools</label>
+            <input
+              value={allowedTools}
+              onChange={(e) => setAllowedTools(e.target.value)}
+              placeholder='e.g. Bash(git:*) Edit Read'
+            />
+          </div>
+
+          <div className="form-group">
+            <label>--disallowedTools</label>
+            <input
+              value={disallowedTools}
+              onChange={(e) => setDisallowedTools(e.target.value)}
+              placeholder='e.g. Bash(rm:*) Write'
+            />
+          </div>
+
+          <div className="form-group">
+            <label>--add-dir</label>
+            <input
+              value={addDirs}
+              onChange={(e) => setAddDirs(e.target.value)}
+              placeholder="Additional directories (comma-separated)"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>--mcp-config</label>
+            <input
+              value={mcpConfig}
+              onChange={(e) => setMcpConfig(e.target.value)}
+              placeholder="Path to MCP config JSON file"
+            />
+          </div>
+        </>
+      )}
 
       {provider === 'claude' && (
         <div className="form-group">
