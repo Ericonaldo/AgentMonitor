@@ -1,24 +1,20 @@
 # What we are building
-1. A web-based monitor that allows users to create, manage, close all agents, first version should support cc
-2. When creating agent, the user can select which dir to run (on the server machine that run this monitor), should have checkboxes to serve as creating parameters. For example for cc, there should be (resume, dangerously-skip-permission, chrome, etc) as choices, then the web run a claude agent with claude --flags in background (claude -p [prompt]). if choose resume, should list all prev conversations as listed in the bash with claude--resume.
-3. When creating agent, the user can provide claude.md, or modified from existing template
-4. When creating agent, the user can provide an admin email so that the agent can notify the human when required.
-5. The user can add claude.md template to the monitor
-6. There should be a card-based monitor where the user can watch all agents and what they are currently doing (latest info), the user can change claude.md for each card (representing a agent)
-7. The user can click into each card and will enter a web-based agent gui page, which is similar to ChatGPT, but the user can use similar commands here as the original bash-based user, for claude such as twice esc, and support `/` hints, and so on, basically like a bash in web8. Each agent should work with git worktree (each worktree should have a seperate claude.md), so that if different agents work in the same directory, they should use different branches to avoid conflictThe monitor allows basic usage as the user manually manipulates each agent and makes new agents. 
-9. When some agent needs human interaction, send a email to the admin user to notify him, if no email is filled, just wait.
+i want to work like this way: the agent is run on this machine, which is not accessible through public web. therefore, i need a transmission layer running on a public server that can be accessed both this machine and a portable machine (like my laptop or my phone), in that way, the dashboard is run and accessible on the public server, which receives request  from my personal portable devices and send it back to this machine. Make an architecture design/change to support both this mode and the current local mode.
 
-# Premium ability meta agent that serves as an agent manager.
-The agent manager runs in a while true loop doing one thing (fetch the latest task list, then create agent to do)
-The user can add consequence tasks or parallel tasks. For consequence tasks, the manager should be able to a) know the former task ended, then close prev agent and create a new agent to run the next task
-The agent manager is also a claude agent, the user can change its claude.md or simply used the default one, we have to make a default one.
-The agent manager should be able to understand what each agent is doing and create them sufficient permissions like chrome, also should be able to change their claude.md as needed.
+inside the `create new agent` for claude, in the options, should also have --chrome and other possible dash-based cli flags 
+
+## The public server you can use
+```bash
+ssh newserver
+```
+this is a public-accessible server.
 
 # Your job
 Keep working until confirmed all features works, passed with test. for premium ability, need to finish a small project managed by the agent manager
 
 Use this tool to further develop future functions
-After every new function developed, update the related doc.
+
+After every new function developed, update the README and related doc.
 
 Now try to support codex, all requirements are same to claude code. use your bash and chrome mcp to verify all functions.
 
@@ -124,3 +120,4 @@ after each feature done and tested pass, should **commit then merge to main** be
 ---
 
 **同样的问题不要犯两次！**
+**after every new feauture, update readme and docs!!!**
