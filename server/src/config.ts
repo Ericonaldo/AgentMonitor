@@ -24,4 +24,10 @@ export const config = {
   slack: {
     webhookUrl: process.env.SLACK_WEBHOOK_URL || '',
   },
+  relay: {
+    /** WebSocket URL of the relay server (e.g., ws://192.3.168.14:3457/tunnel) */
+    url: process.env.RELAY_URL || '',
+    /** Shared secret token for tunnel authentication */
+    token: process.env.RELAY_TOKEN || '',
+  },
 };

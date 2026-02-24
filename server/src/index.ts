@@ -17,6 +17,8 @@ import { sessionRoutes } from './routes/sessions.js';
 import { directoryRoutes } from './routes/directories.js';
 import { taskRoutes } from './routes/tasks.js';
 import { setupSocketHandlers } from './socket/handlers.js';
+import { TunnelClient } from './services/TunnelClient.js';
+import { setupTunnelBridge } from './services/tunnelBridge.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -93,7 +95,16 @@ export function createApp() {
     }
   }, 60_000);
 
-  return { app, httpServer, io, store, manager, metaAgent, cleanupInterval };
+  // Tunnel to relay server (optional - only when RELAY_URL is set)
+  let tunnelClient: TunnelClient | null = null;
+  if (config.relay.url && config.relay.token) {
+    tunnelClient = new TunnelClient(config.relay.url, config.relay.token, config.port);
+    setupTunnelBridge(tunnelClient, manager, metaAgent);
+    tunnelClient.start();
+    console.log(`[Server] Tunnel client connecting to ${config.relay.url}`);
+  }
+
+  return { app, httpServer, io, store, manager, metaAgent, cleanupInterval, tunnelClient };
 }
 
 // Only start server if this is the main module

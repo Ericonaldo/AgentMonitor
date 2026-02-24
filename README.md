@@ -144,6 +144,13 @@ All configuration is via environment variables. Copy `.env.example` to `.env` an
 |----------|---------|-------------|
 | `SLACK_WEBHOOK_URL` | — | Default Slack Incoming Webhook URL |
 
+### Remote Relay (Tunnel)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RELAY_URL` | — | WebSocket URL of relay server (e.g., `ws://your-server:3457/tunnel`) |
+| `RELAY_TOKEN` | — | Shared secret for tunnel authentication |
+
 > If SMTP, Twilio, or Slack credentials are not set, the respective notification channel is disabled gracefully — events are logged to the server console.
 
 ---
@@ -244,6 +251,32 @@ Create, edit, and reuse CLAUDE.md instruction templates across agents.
 
 ---
 
+## Remote Access (Relay Mode)
+
+Access the Agent Monitor dashboard from anywhere — phone, laptop, or any device — via a public relay server. The relay forwards all HTTP and WebSocket traffic through a secure tunnel.
+
+```
+Phone/Laptop → HTTP → Public Server (Relay :3457) ← WS tunnel ← Local Machine (:3456)
+```
+
+### Setup
+
+1. **Deploy the relay** to a public server:
+   ```bash
+   bash relay/scripts/deploy.sh <your-secret-token>
+   ```
+
+2. **Connect the local server** by setting environment variables:
+   ```bash
+   RELAY_URL=ws://your-server:3457/tunnel RELAY_TOKEN=<your-secret-token> npx tsx server/src/index.ts
+   ```
+
+3. **Open the dashboard** from any device at `http://your-server:3457`
+
+The tunnel auto-reconnects if the connection drops. When `RELAY_URL` is not set, the server runs in local-only mode with no relay overhead.
+
+---
+
 ## Provider Support
 
 | | Claude Code | Codex |
@@ -272,6 +305,8 @@ AgentMonitor/
         AgentProcess.ts     # CLI process wrapper
         AgentManager.ts     # Agent lifecycle
         MetaAgentManager.ts # Pipeline orchestration
+        TunnelClient.ts     # Outbound tunnel to relay server
+        tunnelBridge.ts     # Event bridge for tunnel
         WorktreeManager.ts  # Git worktree ops
         EmailNotifier.ts    # SMTP email notifications
         WhatsAppNotifier.ts # Twilio WhatsApp notifications
@@ -282,6 +317,14 @@ AgentMonitor/
       routes/               # REST endpoints
       socket/handlers.ts    # WebSocket handlers
     __tests__/              # Test suite
+  relay/                    # Public relay server (deployed independently)
+    src/
+      index.ts              # Relay entry point
+      tunnel.ts             # TunnelManager (WS server)
+      httpProxy.ts          # HTTP forwarding through tunnel
+      socketBridge.ts       # Socket.IO ↔ tunnel bridge
+      config.ts             # Relay configuration
+    scripts/deploy.sh       # Build & deploy to public server
   client/                   # React + Vite
     src/
       pages/                # Dashboard, Chat, Pipeline, Templates
