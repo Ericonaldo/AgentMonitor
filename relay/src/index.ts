@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
@@ -8,6 +9,7 @@ import { relayConfig } from './config.js';
 import { TunnelManager } from './tunnel.js';
 import { createHttpProxy } from './httpProxy.js';
 import { setupSocketBridge } from './socketBridge.js';
+import { createAuthRoutes, requireAuth } from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,6 +31,10 @@ function main() {
   // Middleware
   app.use(cors());
   app.use(express.json());
+  app.use(cookieParser());
+
+  // Auth routes (before auth middleware)
+  app.use('/api/auth', createAuthRoutes());
 
   // Relay status endpoint (local to relay, not forwarded through tunnel)
   app.get('/api/relay/status', (_req, res) => {
@@ -37,6 +43,9 @@ function main() {
       uptime: Math.floor((Date.now() - tunnel.startTime) / 1000),
     });
   });
+
+  // Protect all other API routes
+  app.use('/api', requireAuth);
 
   // Forward all /api/* requests through tunnel to local machine
   app.use('/api', createHttpProxy(tunnel));
@@ -68,6 +77,11 @@ function main() {
   httpServer.listen(relayConfig.port, '0.0.0.0', () => {
     console.log(`[Relay] Listening on port ${relayConfig.port}`);
     console.log(`[Relay] Tunnel endpoint: ws://0.0.0.0:${relayConfig.port}/tunnel`);
+    if (relayConfig.password) {
+      console.log('[Relay] Authentication enabled (RELAY_PASSWORD is set)');
+    } else {
+      console.warn('[Relay] WARNING: RELAY_PASSWORD not set — dashboard is unprotected!');
+    }
     if (relayConfig.domain) {
       console.log(`[Relay] Domain: ${relayConfig.domain}`);
     }

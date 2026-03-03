@@ -25,10 +25,12 @@ The tunnel is **outbound-only** from the agent machine — no inbound ports need
 
 ```bash
 # From the AgentMonitor repo on any machine with SSH access:
-bash relay/scripts/deploy.sh <your-secret-token>
+bash relay/scripts/deploy.sh <your-secret-token> <your-dashboard-password>
 ```
 
 This builds the client + relay, rsyncs to the server, installs deps, and starts with pm2.
+
+> **Important:** Set a dashboard password to protect your relay from unauthorized access. Without it, anyone who knows the URL can control your agents.
 
 ### 2. Start AgentMonitor with tunnel enabled
 
@@ -159,6 +161,7 @@ bash relay/scripts/deploy.sh <your-token>
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `RELAY_TOKEN` | Yes | Shared secret — must match agent machine |
+| `RELAY_PASSWORD` | Recommended | Dashboard login password (if empty, no auth) |
 | `RELAY_PORT` | No | Port relay listens on (default: `3457`) |
 | `RELAY_DOMAIN` | No | Domain name if using nginx reverse proxy |
 
@@ -185,7 +188,8 @@ When `RELAY_URL` is **not set**, the server runs in local-only mode with zero re
 
 - The tunnel uses a **shared token** for authentication. Use a strong random token.
 - The relay port is **open to the internet**. Consider using a firewall or nginx with HTTPS.
-- Dashboard access is **unauthenticated**. For production use, put nginx with basic auth or a VPN in front.
+- **Set `RELAY_PASSWORD`** to enable login authentication. Without it, the dashboard is open to anyone.
+- Sessions use JWT tokens stored in httpOnly cookies with 24-hour expiry.
 
 ### Adding nginx + HTTPS (optional)
 

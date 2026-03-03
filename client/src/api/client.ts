@@ -6,6 +6,11 @@ async function request<T>(path: string, opts?: RequestInit): Promise<T> {
     ...opts,
   });
   if (!res.ok) {
+    // Redirect to login on 401 (relay auth required)
+    if (res.status === 401 && !path.startsWith('/auth/')) {
+      window.location.href = '/login';
+      throw new Error('Authentication required');
+    }
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `HTTP ${res.status}`);
   }

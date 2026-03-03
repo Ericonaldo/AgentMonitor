@@ -13,11 +13,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REMOTE="newserver"
 RELAY_TOKEN="${1:-${RELAY_TOKEN:-}}"
+RELAY_PASSWORD="${2:-${RELAY_PASSWORD:-}}"
 
 if [ -z "$RELAY_TOKEN" ]; then
-  echo "Error: RELAY_TOKEN required. Pass as argument or set env var."
-  echo "Usage: $0 <token>"
+  echo "Error: RELAY_TOKEN required. Pass as first argument or set env var."
+  echo "Usage: $0 <token> [password]"
   exit 1
+fi
+
+if [ -z "$RELAY_PASSWORD" ]; then
+  echo "WARNING: No RELAY_PASSWORD set — dashboard will be unprotected!"
+  echo "  Pass as second argument or set RELAY_PASSWORD env var."
 fi
 
 # Get remote home directory
@@ -56,7 +62,7 @@ ssh "$REMOTE" "cd $REMOTE_DIR && npm ci --omit=dev 2>&1 | tail -3"
 echo "=== Starting relay with pm2 ==="
 ssh "$REMOTE" "export PATH=\$HOME/.npm-global/bin:\$PATH && cd $REMOTE_DIR && \
   pm2 delete agentmonitor-relay 2>/dev/null || true && \
-  RELAY_TOKEN='$RELAY_TOKEN' RELAY_PORT=3457 \
+  RELAY_TOKEN='$RELAY_TOKEN' RELAY_PASSWORD='$RELAY_PASSWORD' RELAY_PORT=3457 \
   pm2 start dist/index.js --name agentmonitor-relay \
     --restart-delay=3000"
 
@@ -68,3 +74,6 @@ echo ""
 echo "To connect from local machine, set:"
 echo "  RELAY_URL=ws://192.3.168.14:3457/tunnel"
 echo "  RELAY_TOKEN=$RELAY_TOKEN"
+if [ -n "$RELAY_PASSWORD" ]; then
+  echo "Dashboard login password: (set via RELAY_PASSWORD)"
+fi

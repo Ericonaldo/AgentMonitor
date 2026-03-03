@@ -263,7 +263,7 @@ Phone/Laptop → HTTP → Public Server (Relay :3457) ← WS tunnel ← Local Ma
 
 1. **Deploy the relay** to a public server:
    ```bash
-   bash relay/scripts/deploy.sh <your-secret-token>
+   bash relay/scripts/deploy.sh <your-secret-token> <your-dashboard-password>
    ```
 
 2. **Connect the local server** by setting environment variables:
@@ -271,9 +271,9 @@ Phone/Laptop → HTTP → Public Server (Relay :3457) ← WS tunnel ← Local Ma
    RELAY_URL=ws://your-server:3457/tunnel RELAY_TOKEN=<your-secret-token> npx tsx server/src/index.ts
    ```
 
-3. **Open the dashboard** from any device at `http://your-server:3457`
+3. **Open the dashboard** from any device at `http://your-server:3457` — log in with your password
 
-The tunnel auto-reconnects if the connection drops. When `RELAY_URL` is not set, the server runs in local-only mode with no relay overhead.
+The relay supports **password-based login** via `RELAY_PASSWORD` to protect the dashboard from unauthorized access. Sessions use JWT tokens with 24-hour expiry. The tunnel auto-reconnects if the connection drops. When `RELAY_URL` is not set, the server runs in local-only mode with no relay overhead.
 
 ---
 

@@ -5,9 +5,11 @@ import { CreateAgent } from './pages/CreateAgent';
 import { AgentChat } from './pages/AgentChat';
 import { Templates } from './pages/Templates';
 import { Pipeline } from './pages/Pipeline';
+import { Login } from './pages/Login';
+import { useAuth } from './hooks/useAuth';
 import { LanguageProvider, useTranslation } from './i18n';
 
-function NavBar() {
+function NavBar({ onLogout }: { onLogout?: () => void }) {
   const location = useLocation();
   const { lang, setLang, t } = useTranslation();
 
@@ -43,7 +45,44 @@ function NavBar() {
       >
         {lang === 'en' ? '中文' : 'EN'}
       </button>
+      {onLogout && (
+        <button
+          className="lang-toggle"
+          onClick={onLogout}
+          title="Logout"
+          style={{ marginLeft: '0.25rem' }}
+        >
+          Logout
+        </button>
+      )}
     </nav>
+  );
+}
+
+function AuthenticatedApp() {
+  const { authenticated, loading, logout } = useAuth();
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text, #e2e8f0)' }}>Loading...</div>;
+  }
+
+  if (!authenticated) {
+    return null; // useAuth will redirect to /login
+  }
+
+  return (
+    <div className="app">
+      <NavBar onLogout={logout} />
+      <main className="main">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/pipeline" element={<Pipeline />} />
+          <Route path="/create" element={<CreateAgent />} />
+          <Route path="/agent/:id" element={<AgentChat />} />
+          <Route path="/templates" element={<Templates />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
 
@@ -55,18 +94,10 @@ export function App() {
 
   return (
     <LanguageProvider>
-      <div className="app">
-        <NavBar />
-        <main className="main">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/pipeline" element={<Pipeline />} />
-            <Route path="/create" element={<CreateAgent />} />
-            <Route path="/agent/:id" element={<AgentChat />} />
-            <Route path="/templates" element={<Templates />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/*" element={<AuthenticatedApp />} />
+      </Routes>
     </LanguageProvider>
   );
 }
