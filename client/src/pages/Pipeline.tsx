@@ -22,6 +22,7 @@ export function Pipeline() {
   const [newOrder, setNewOrder] = useState<number | ''>('');
   const [newClaudeMd, setNewClaudeMd] = useState('');
   const [newSkipPerms, setNewSkipPerms] = useState(true);
+  const [newChrome, setNewChrome] = useState(false);
 
   // Config form
   const [cfgClaudeMd, setCfgClaudeMd] = useState('');
@@ -74,7 +75,7 @@ export function Pipeline() {
       provider: newProvider,
       model: newModel.trim() || undefined,
       claudeMd: newClaudeMd.trim() || undefined,
-      flags: { dangerouslySkipPermissions: newSkipPerms },
+      flags: { dangerouslySkipPermissions: newSkipPerms, chrome: newChrome || undefined },
       order: newOrder !== '' ? newOrder : undefined,
     });
     setShowAddTask(false);
@@ -85,6 +86,7 @@ export function Pipeline() {
     setNewOrder('');
     setNewClaudeMd('');
     setNewSkipPerms(true);
+    setNewChrome(false);
     fetchData();
   };
 
@@ -360,6 +362,14 @@ export function Pipeline() {
                   onChange={(e) => setNewSkipPerms(e.target.checked)}
                 />
                 {t('pipeline.skipPermissions')}
+              </label>
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={newChrome}
+                  onChange={(e) => setNewChrome(e.target.checked)}
+                />
+                {t('pipeline.chrome')}
               </label>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

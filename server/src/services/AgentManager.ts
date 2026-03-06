@@ -136,8 +136,12 @@ export class AgentManager extends EventEmitter {
       this.handleClaudeMessage(agent, msg);
     }
 
-    // Emit to socket
+    // Emit raw message (kept for backward compat) + full agent snapshot for streaming
     this.emit('agent:message', agentId, msg);
+    const updated = this.store.getAgent(agentId);
+    if (updated) {
+      this.emit('agent:update', agentId, updated);
+    }
   }
 
   private handleClaudeMessage(agent: Agent, msg: StreamMessage): void {
@@ -296,6 +300,7 @@ export class AgentManager extends EventEmitter {
       agent.lastActivity = Date.now();
       this.store.saveAgent(agent);
       this.emit('agent:status', agentId, status);
+      this.emit('agent:update', agentId, agent);
     }
   }
 

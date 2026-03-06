@@ -295,6 +295,7 @@ export class MetaAgentManager extends EventEmitter {
             dangerouslySkipPermissions: task.flags?.dangerouslySkipPermissions ?? true,
             model: task.model,
             fullAuto: task.flags?.fullAuto,
+            chrome: task.flags?.chrome,
           },
         },
       );

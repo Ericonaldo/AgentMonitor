@@ -75,18 +75,30 @@ export function AgentChat() {
     joinAgent(id);
     const socket = getSocket();
 
-    const onMessage = (data: { agentId: string }) => {
-      if (data.agentId === id) fetchAgent();
-    };
-    const onStatus = (data: { agentId: string }) => {
-      if (data.agentId === id) fetchAgent();
+    // Use agent:update for real-time streaming (full agent snapshot, no HTTP needed)
+    let hasUpdate = false;
+    const onUpdate = (data: { agentId: string; agent: Agent }) => {
+      if (data.agentId === id && data.agent) {
+        hasUpdate = true;
+        setAgent(data.agent);
+      }
     };
 
+    // Legacy fallback: only re-fetch if agent:update isn't available
+    const onMessage = (data: { agentId: string }) => {
+      if (!hasUpdate && data.agentId === id) fetchAgent();
+    };
+    const onStatus = (data: { agentId: string }) => {
+      if (!hasUpdate && data.agentId === id) fetchAgent();
+    };
+
+    socket.on('agent:update', onUpdate);
     socket.on('agent:message', onMessage);
     socket.on('agent:status', onStatus);
 
     return () => {
       leaveAgent(id);
+      socket.off('agent:update', onUpdate);
       socket.off('agent:message', onMessage);
       socket.off('agent:status', onStatus);
     };

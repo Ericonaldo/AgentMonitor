@@ -42,16 +42,38 @@ export function Dashboard() {
     fetchSettings();
 
     const socket = getSocket();
-    socket.on('agent:status', () => {
+
+    // Real-time: use agent:snapshot to update individual cards without full re-fetch
+    let hasSnapshot = false;
+    const onSnapshot = (data: { agentId: string; agent: Agent }) => {
+      if (data.agent) {
+        hasSnapshot = true;
+        setAgents((prev) => {
+          const idx = prev.findIndex((a) => a.id === data.agentId);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = data.agent;
+            return next;
+          }
+          // New agent appeared
+          return [...prev, data.agent];
+        });
+      }
+    };
+
+    // Fallback for status changes (e.g., stop/delete which don't emit snapshot)
+    const onStatus = () => {
+      if (!hasSnapshot) fetchAgents();
+      // For 'deleted' status from cleanup, always re-fetch to remove cards
       fetchAgents();
-    });
-    socket.on('agent:message', () => {
-      fetchAgents();
-    });
+    };
+
+    socket.on('agent:snapshot', onSnapshot);
+    socket.on('agent:status', onStatus);
 
     return () => {
-      socket.off('agent:status');
-      socket.off('agent:message');
+      socket.off('agent:snapshot', onSnapshot);
+      socket.off('agent:status', onStatus);
     };
   }, []);
 

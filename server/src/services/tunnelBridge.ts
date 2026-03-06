@@ -35,6 +35,22 @@ export function setupTunnelBridge(
     });
   });
 
+  // Full agent snapshot → room-targeted for chat streaming
+  manager.on('agent:update', (agentId: string, agent: unknown) => {
+    tunnel.send({
+      type: 'socket:s2c:room',
+      event: 'agent:update',
+      room: `agent:${agentId}`,
+      args: [{ agentId, agent }],
+    });
+    // Broadcast lightweight snapshot for Dashboard cards
+    tunnel.send({
+      type: 'socket:s2c',
+      event: 'agent:snapshot',
+      args: [{ agentId, agent }],
+    });
+  });
+
   // MetaAgent task updates → broadcast
   metaAgent.on('task:update', (task: unknown) => {
     tunnel.send({
